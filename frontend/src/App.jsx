@@ -15,9 +15,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/previous-courses" element={<PreviousCourses />} />
-          <Route path="/previous-courses" element={<div className="placeholder-page">Previous Courses - Coming Soon</div>} />
           <Route path="/upload-marks" element={<UploadMarks />} />
-          <Route path="/upload-course" element={<div className="placeholder-page">Upload Course - Coming Soon</div>} />
         </Routes>
       </div>
     </Router>
