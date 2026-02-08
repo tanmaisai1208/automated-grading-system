@@ -3,12 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Dashboard from './pages/dashboard';
 import UploadMarks from "./pages/uploadMarks";
 import PreviousCourses from "./pages/previousCourses";
+import ScrollToTop from "./components/ScrollToTop";
 import './App.css';
 
 function App() {
   return (
     <Router>
       <div className="App">
+      <ScrollToTop />
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
