@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import HelpModal from "../components/HelpModal";
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import './Dashboard.css';
@@ -7,6 +8,7 @@ import './Dashboard.css';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -315,7 +317,7 @@ const Dashboard = () => {
                   <p>Access our comprehensive documentation, video tutorials, and dedicated support resources to make the most of your grading platform.</p>
                 </div>
 
-                <button className="help-button">
+                <button className="help-button" onClick={() => setShowHelp(true)}>
                   <span>View Documentation</span>
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -328,6 +330,10 @@ const Dashboard = () => {
       </main>
 
       <Footer />
+
+      {showHelp && (
+        <HelpModal onClose={() => setShowHelp(false)} />
+      )}
     </div>
   );
 };
