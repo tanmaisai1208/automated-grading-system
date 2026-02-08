@@ -236,7 +236,7 @@ const Dashboard = () => {
               </div>
 
               {/* Card 2 */}
-              <div className="nav-card nav-card-secondary" onClick={() => handleNavigate('/upload-course')}>
+              <div className="nav-card nav-card-secondary" onClick={() => handleNavigate('/upload-marks')}>
                 <div className="card-shine"></div>
                 <div className="card-corner corner-tl"></div>
                 <div className="card-corner corner-tr"></div>
