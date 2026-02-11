@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import "./uploadMarks.css";
 
 const UploadMarks = () => {
+  const navigate = useNavigate();
   const [courseName, setCourseName] = useState("");
   const [batch, setBatch] = useState("");
   const [coordinators, setCoordinators] = useState("");
@@ -23,7 +25,9 @@ const UploadMarks = () => {
     };
 
     console.log("Upload Data:", uploadData);
-    alert("Course details and Excel file captured successfully!");
+
+    // Navigate to Confirm Weightages page
+    navigate("/confirm-weightages");
   };
 
   return (
