@@ -4,6 +4,7 @@ import Dashboard from './pages/dashboard';
 import UploadMarks from "./pages/uploadMarks";
 import PreviousCourses from "./pages/previousCourses";
 import ScrollToTop from "./components/ScrollToTop";
+import AutomatedGrade from "./pages/automatedGrade";
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/previous-courses" element={<PreviousCourses />} />
           <Route path="/upload-marks" element={<UploadMarks />} />
+          <Route path="/automated-grade" element={<AutomatedGrade />} />
         </Routes>
       </div>
     </Router>
