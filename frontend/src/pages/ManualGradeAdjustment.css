@@ -1,0 +1,124 @@
+.manual-grade-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+}
+
+.manual-grade-main {
+  flex: 1;
+  padding: 3rem 0;
+}
+
+.manual-grade-container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 0 2rem;
+}
+
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: #475569;
+  margin-bottom: 2.5rem;
+}
+
+.card-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: #0f172a;
+}
+
+.grade-table,
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.grade-table th,
+.grade-table td,
+.student-table th,
+.student-table td {
+  padding: 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.grade-table th,
+.student-table th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.grade-table th,
+.grade-table td,
+.student-table th,
+.student-table td {
+  color: #0f172a;   /* dark navy */
+}
+
+.grade-table input {
+  width: 80px;
+  padding: 0.4rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5f5;
+  text-align: center;
+}
+
+
+.grade-table td:first-child {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.grade-table th,
+.student-table th {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+}
+
+.primary-btn {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.auto-grade {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.manual-grade {
+  font-weight: 700;
+  color: #16a34a;
+}

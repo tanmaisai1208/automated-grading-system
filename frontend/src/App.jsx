@@ -6,6 +6,7 @@ import PreviousCourses from "./pages/previousCourses";
 import ConfirmWeightages from "./pages/ConfirmWeightages";
 import ScrollToTop from "./components/ScrollToTop";
 import AutomatedGrade from "./pages/automatedGrade";
+import ManualGradeAdjustment from "./pages/ManualGradeAdjustment";
 import './App.css';
 
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/previous-courses" element={<PreviousCourses />} />
           <Route path="/upload-marks" element={<UploadMarks />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
+          <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
         </Routes>
       </div>
     </Router>
