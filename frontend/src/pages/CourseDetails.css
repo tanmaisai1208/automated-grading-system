@@ -1,0 +1,138 @@
+.course-details-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+}
+
+.course-details-main {
+  flex: 1;
+  padding: 3rem 0;
+}
+
+.course-details-container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 0 2rem;
+}
+
+/* Header */
+.course-header {
+  margin-bottom: 2rem;
+}
+
+.course-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.course-code {
+  font-family: serif;
+  margin-left: 1rem;
+  font-size: 1.25rem;
+  padding: 0.35rem 0.75rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-radius: 8px;
+}
+
+.course-subtitle {
+  color: #475569;
+  font-size: 1.1rem;
+}
+
+/* Table Card */
+.table-card {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 18px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  animation: fadeInUp 0.5s ease;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Table */
+.marks-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.marks-table thead {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
+.marks-table thead th {
+  color: #fff;
+  padding: 1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.marks-table tbody td {
+  color: #0f172a;              /* dark navy */
+  font-weight: 500;
+}
+
+.marks-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.marks-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.marks-table tbody tr:hover {
+  background: #f1f5f9;
+}
+
+.marks-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  white-space: nowrap;
+}
+
+/* Highlight Columns */
+.total-cell {
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.auto-grade {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.manual-grade {
+  font-weight: 600;
+  color: #16a34a;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .course-title {
+    font-size: 2rem;
+  }
+
+  .course-details-container {
+    padding: 0 1rem;
+  }
+}

@@ -1,9 +1,11 @@
 import React from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import { useNavigate } from "react-router-dom";
 import "./previousCourses.css";
 
 const PreviousCourses = () => {
+  const navigate = useNavigate();
   // Temporary dummy data (backend later)
   const courses = [
     {
@@ -65,7 +67,10 @@ const PreviousCourses = () => {
                   👨‍🎓 {course.students} Students
                 </div>
 
-                <div className="course-action">
+                <div
+                  className="course-action"
+                  onClick={() => navigate(`/viewdetails/${course.id}`)}
+                >
                   View Details →
                 </div>
               </div>

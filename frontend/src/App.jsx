@@ -1,10 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ScrollToTop from "./components/ScrollToTop";
 import Dashboard from './pages/dashboard';
 import UploadMarks from "./pages/uploadMarks";
 import PreviousCourses from "./pages/previousCourses";
+import CourseDetails from "./pages/CourseDetails";
 import ConfirmWeightages from "./pages/ConfirmWeightages";
-import ScrollToTop from "./components/ScrollToTop";
 import AutomatedGrade from "./pages/automatedGrade";
 import ManualGradeAdjustment from "./pages/ManualGradeAdjustment";
 import './App.css';
@@ -21,6 +22,7 @@ function App() {
           <Route path="/confirm-weightages" element={<ConfirmWeightages />} />
           <Route path="/previous-courses" element={<PreviousCourses />} />
           <Route path="/upload-marks" element={<UploadMarks />} />
+          <Route path="/course-details" element={<CourseDetails />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
           <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
         </Routes>
