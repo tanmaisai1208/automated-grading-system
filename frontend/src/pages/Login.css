@@ -1,0 +1,111 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+}
+
+.login-main {
+  flex: 1;
+  padding: 3rem 0;
+}
+
+.login-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 0 2rem;
+  text-align: center;
+}
+
+/* SAME PAGE TITLE STYLE AS OTHER PAGES */
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: #475569;
+  margin-bottom: 2.5rem;
+}
+
+/* BIGGER LOGIN CARD */
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  padding: 3rem;
+  max-width: 520px;
+  margin: auto;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* FORM */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.login-form input {
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5f5;
+  font-size: 1rem;
+}
+
+/* PRIMARY BUTTON (same style system) */
+.primary-btn {
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+}
+
+/* DIVIDER */
+.divider {
+  margin: 2rem 0 1.5rem;
+  color: #64748b;
+}
+
+/* GOOGLE BUTTON */
+.google-btn {
+  width: fit-content;
+  margin: 0 auto;
+
+  padding: 0.7rem 1.3rem; 
+  background: white;
+  border: 1.5px solid #d1d5db;
+  border-radius: 7px;
+
+  font-size: 1.05rem;     
+  font-weight: 600;
+  color: #1f2933;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.google-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.google-icon {
+  width: 22px;   
+  height: 22px;
+}

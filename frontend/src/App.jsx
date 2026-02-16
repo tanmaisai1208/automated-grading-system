@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from "./auth/AuthContext";
+import Login from "./pages/Login";
 import ScrollToTop from "./components/ScrollToTop";
 import Dashboard from './pages/dashboard';
 import UploadMarks from "./pages/uploadMarks";
@@ -10,24 +12,90 @@ import AutomatedGrade from "./pages/automatedGrade";
 import ManualGradeAdjustment from "./pages/ManualGradeAdjustment";
 import './App.css';
 
-
+function PrivateRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/" />;
+}
 function App() {
   return (
-    <Router>
-      <div className="App">
-      <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/confirm-weightages" element={<ConfirmWeightages />} />
-          <Route path="/previous-courses" element={<PreviousCourses />} />
-          <Route path="/upload-marks" element={<UploadMarks />} />
-          <Route path="/course-details" element={<CourseDetails />} />
-          <Route path="/automated-grade" element={<AutomatedGrade />} />
-          <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <ScrollToTop />
+
+          <Routes>
+
+            {/* Landing page = Login */}
+            <Route path="/" element={<Login />} />
+
+            {/* Protected pages */}
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/confirm-weightages"
+              element={
+                <PrivateRoute>
+                  <ConfirmWeightages />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/previous-courses"
+              element={
+                <PrivateRoute>
+                  <PreviousCourses />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/upload-marks"
+              element={
+                <PrivateRoute>
+                  <UploadMarks />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/course-details"
+              element={
+                <PrivateRoute>
+                  <CourseDetails />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/automated-grade"
+              element={
+                <PrivateRoute>
+                  <AutomatedGrade />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/manual-grade-adjustment"
+              element={
+                <PrivateRoute>
+                  <ManualGradeAdjustment />
+                </PrivateRoute>
+              }
+            />
+
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
