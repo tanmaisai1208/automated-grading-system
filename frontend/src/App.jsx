@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from "./auth/AuthContext";
+import Login from "./pages/Login";
 import ScrollToTop from "./components/ScrollToTop";
 import Dashboard from './pages/dashboard';
 import UploadMarks from "./pages/uploadMarks";
@@ -11,7 +13,10 @@ import ManualGradeAdjustment from "./pages/ManualGradeAdjustment";
 import StatisticalAnalysis from './pages/StatisticalAnalysis';
 import './App.css';
 
-
+function PrivateRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/" />;
+}
 function App() {
   return (
     <Router>
@@ -26,7 +31,6 @@ function App() {
           <Route path="/course-details" element={<CourseDetails />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
           <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
-          <Route path="/statistical-analysis" element={<StatisticalAnalysis />} />
         </Routes>
       </div>
     </Router>
