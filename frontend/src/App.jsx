@@ -8,6 +8,7 @@ import CourseDetails from "./pages/CourseDetails";
 import ConfirmWeightages from "./pages/ConfirmWeightages";
 import AutomatedGrade from "./pages/automatedGrade";
 import ManualGradeAdjustment from "./pages/ManualGradeAdjustment";
+import StatisticalAnalysis from './pages/StatisticalAnalysis';
 import './App.css';
 
 
@@ -25,10 +26,11 @@ function App() {
           <Route path="/course-details" element={<CourseDetails />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
           <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
+          <Route path="/statistical-analysis" element={<StatisticalAnalysis />} />
         </Routes>
       </div>
     </Router>
   );
 }
-
+ 
 export default App;
