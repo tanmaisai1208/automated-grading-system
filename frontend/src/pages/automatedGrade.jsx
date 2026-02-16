@@ -1,22 +1,45 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import "./AutomatedGrade.css";
+import "./automatedGrade.css";
 
-const AutomatedGradePage = () => {
-  const navigate = useNavigate();
+export default function AutomatedGrade() {
+  const [students] = useState([
+    { id: 1, name: "Alice", marks: 88, grade: "AA" },
+    { id: 2, name: "Bob", marks: 72, grade: "BB" },
+    { id: 3, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 4, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 5, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 6, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 7, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 8, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 9, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 10, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 11, name: "Charlie", marks: 59, grade: "CC" },
+    { id: 12, name: "Charlie", marks: 59, grade: "CC" },
+  ]);
 
-  // 🔹 Hardcoded grade ranges (temporary)
-  const gradeRanges = [
-    { grade: "AA", min: 90, max: 100, count: 8 },
-    { grade: "AB", min: 80, max: 89, count: 15 },
-    { grade: "BB", min: 70, max: 79, count: 28 },
-    { grade: "BC", min: 60, max: 69, count: 34 },
-    { grade: "CC", min: 50, max: 59, count: 31 },
-    { grade: "CD", min: 40, max: 49, count: 18 },
-    { grade: "FR", min: 0, max: 39, count: 8 },
-  ];
+  const [weightages, setWeightages] = useState({
+    assignments: 30,
+    midterm: 30,
+    final: 40,
+  });
+
+  const [cutoffs, setCutoffs] = useState({
+    AA: 90,
+    AB: 80,
+    BB: 70,
+    BC: 60,
+    CC: 50,
+  });
+
+  const handleWeightChange = (key, value) => {
+    setWeightages({ ...weightages, [key]: value });
+  };
+
+  const handleCutoffChange = (key, value) => {
+    setCutoffs({ ...cutoffs, [key]: value });
+  };
 
   return (
     <div className="auto-grade-wrapper">
@@ -25,78 +48,115 @@ const AutomatedGradePage = () => {
       <main className="auto-grade-main">
         <div className="auto-grade-container">
 
-          {/* Page Header */}
-          <section className="auto-header">
-            <div className="header-badge">📊 Automated Grading System</div>
-            <h1>Automated Grade Cutoff Preview</h1>
-            <p>
-              Below are the system-generated grade ranges based on class performance analytics.
-              You may continue with automated grading or manually adjust the ranges.
-            </p>
-          </section>
+          <h1 className="page-title">Computed Grades</h1>
+          <p className="page-subtitle">
+            Automatically generated grades based on analytics.
+            You may adjust weightages and cutoffs.
+          </p>
 
-          {/* Course Info Card */}
-          <section className="course-info-card">
-            <div className="info-item">
-              <span>Course</span>
-              <strong>CS201 – Data Structures</strong>
-            </div>
-            <div className="info-item">
-              <span>Exam</span>
-              <strong>End Semester</strong>
-            </div>
-            <div className="info-item">
-              <span>Total Students</span>
-              <strong>142</strong>
-            </div>
-          </section>
+          <div className="auto-layout">
 
-          {/* Grade Table */}
-          <section className="grade-table-section">
-            <h2>Generated Grade Ranges</h2>
+            {/* LEFT — STUDENT TABLE */}
+            <section className="card-section auto-left">
+              <h2 className="section-title">Student Grades</h2>
 
-            <div className="grade-table">
-              <div className="table-header">
-                <span>Grade</span>
-                <span>Min Marks</span>
-                <span>Max Marks</span>
-                <span>No. of Students</span>
+              <div className="table-scroll">
+                <table className="student-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Marks</th>
+                      <th>Grade</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {students.map((s) => (
+                      <tr key={s.id}>
+                        <td>{s.id}</td>
+                        <td>{s.name}</td>
+                        <td>{s.marks}</td>
+                        <td className="auto-grade">{s.grade}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            </section>
 
-              {gradeRanges.map((g, index) => (
-                <div key={index} className="table-row">
-                  <span className="grade-pill">{g.grade}</span>
-                  <span>{g.min}</span>
-                  <span>{g.max}</span>
-                  <span>{g.count}</span>
-                </div>
-              ))}
+            {/* RIGHT — CONTROLS */}
+            <div className="auto-right">
+
+              {/* WEIGHTAGES */}
+              <section className="card-section">
+                <h2 className="section-title">Weightages</h2>
+
+                <table className="grade-table">
+                  <thead>
+                    <tr>
+                      <th>Component</th>
+                      <th>Weight</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {Object.entries(weightages).map(([k, v]) => (
+                      <tr key={k}>
+                        <td>{k}</td>
+                        <td>
+                          <input
+                            type="number"
+                            value={v}
+                            onChange={(e) =>
+                              handleWeightChange(k, e.target.value)
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
+
+              {/* CUTOFFS */}
+              <section className="card-section">
+                <h2 className="section-title">Grade Cutoffs</h2>
+
+                <table className="grade-table">
+                  <thead>
+                    <tr>
+                      <th>Grade</th>
+                      <th>Min Marks</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {Object.entries(cutoffs).map(([g, v]) => (
+                      <tr key={g}>
+                        <td>{g}</td>
+                        <td>
+                          <input
+                            type="number"
+                            value={v}
+                            onChange={(e) =>
+                              handleCutoffChange(g, e.target.value)
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
+
             </div>
-          </section>
 
-          {/* Action Buttons */}
-          <section className="auto-actions">
-            <button
-              className="manual-btn"
-              onClick={() => navigate("/manual-adjustment")}
-            >
-              ✏️ Manually Edit Grade Ranges
-            </button>
-
-            <button
-              className="continue-btn"
-              onClick={() => navigate("/finalize-grades")}
-            >
-              ✅ Continue with Automated Grading
-            </button>
-          </section>
-
+          </div>
         </div>
       </main>
 
       <Footer />
     </div>
   );
-};
-
-export default AutomatedGradePage;
+}

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import { useNavigate } from "react-router-dom";
 import "./ConfirmWeightages.css";
 
 const ConfirmWeightages = () => {
   // This will later come from backend / Excel parsing
+  const navigate = useNavigate();
   const initialComponents = [
     { name: "Mid Semester Exam", weightage: 30 },
     { name: "End Semester Exam", weightage: 40 },
@@ -28,9 +30,11 @@ const ConfirmWeightages = () => {
   );
 
   const handleSubmit = () => {
-    // later: send confirmed weightages to backend
     console.log("Confirmed Weightages:", components);
+
     alert("Weightages confirmed successfully!");
+
+    navigate("/automated-grade");
   };
 
   return (
