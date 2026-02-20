@@ -31,6 +31,7 @@ function App() {
           <Route path="/course-details" element={<CourseDetails />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
           <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
+          <Route path="/statistical-analysis" element={<StatisticalAnalysis />} />
         </Routes>
       </div>
     </Router>
