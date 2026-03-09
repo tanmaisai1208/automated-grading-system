@@ -28,7 +28,7 @@ function App() {
           <Route path="/confirm-weightages" element={<ConfirmWeightages />} />
           <Route path="/previous-courses" element={<PreviousCourses />} />
           <Route path="/upload-marks" element={<UploadMarks />} />
-          <Route path="/course-details" element={<CourseDetails />} />
+          <Route path="/viewdetails/:courseid" element={<CourseDetails />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
           <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
           <Route path="/statistical-analysis" element={<StatisticalAnalysis />} />
