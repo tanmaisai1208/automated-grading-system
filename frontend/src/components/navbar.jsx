@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAllCourses } from "../services/courseService";
 import "./Navbar.css";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +20,28 @@ const Navbar = () => {
   const handleLogout = () => {
     navigate("/login");
   };
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await getAllCourses();
+        const fetchedCourses = response.courses || [];
+
+        setCourses(fetchedCourses);
+
+        const studentCount = fetchedCourses.reduce(
+          (sum, course) => sum + (course.totalStudents || 0),
+          0
+        );
+
+        setTotalStudents(studentCount);
+      } catch (error) {
+        console.error("Error fetching navbar course data:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   return (
     <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
@@ -58,11 +83,11 @@ const Navbar = () => {
           <div className="nav-stats">
             <div className="stat-pill">
               <span className="pill-icon">📚</span>
-              <span className="pill-text">12 Courses</span>
+              <span className="pill-text">{courses.length} Courses</span>
             </div>
             <div className="stat-pill">
               <span className="pill-icon">🎓</span>
-              <span className="pill-text">450 Students</span>
+              <span className="pill-text">{totalStudents} Students</span>
             </div>
           </div>
 

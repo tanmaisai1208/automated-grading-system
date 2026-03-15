@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import HelpModal from "../components/HelpModal";
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
+import { getAllCourses } from "../services/courseService";
 import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showHelp, setShowHelp] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -20,6 +23,28 @@ const Dashboard = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+  const fetchCourses = async () => {
+    try {
+      const response = await getAllCourses();
+      const fetchedCourses = response.courses || [];
+
+      setCourses(fetchedCourses);
+
+      const studentCount = fetchedCourses.reduce(
+        (sum, course) => sum + (course.totalStudents || 0),
+        0
+      );
+
+      setTotalStudents(studentCount);
+    } catch (error) {
+      console.error("Error fetching dashboard course data:", error);
+    }
+  };
+
+  fetchCourses();
   }, []);
 
   const handleNavigate = (path) => {
@@ -99,7 +124,7 @@ const Dashboard = () => {
                 <div className="stat-content">
                   <p className="stat-label">Total Courses</p>
                   <div className="stat-value-wrapper">
-                    <p className="stat-value">12</p>
+                    <p className="stat-value">{courses.length}</p>
                     <span className="stat-trend trend-positive">+3 this semester</span>
                   </div>
                 </div>
@@ -129,7 +154,7 @@ const Dashboard = () => {
                 <div className="stat-content">
                   <p className="stat-label">Active Students</p>
                   <div className="stat-value-wrapper">
-                    <p className="stat-value">450+</p>
+                    <p className="stat-value">{totalStudents}</p>
                     <span className="stat-trend trend-positive">↑ 12% growth</span>
                   </div>
                 </div>
@@ -230,9 +255,9 @@ const Dashboard = () => {
                     </svg>
                   </button>
                   <div className="card-meta">
-                    <span>12 Courses</span>
+                    <span>{courses.length} Courses</span>
                     <span className="meta-separator">•</span>
-                    <span>450+ Students</span>
+                    <span>{totalStudents} Students</span>
                   </div>
                 </div>
               </div>
