@@ -1,1 +1,55 @@
-[]
+[
+  {
+    "courseId": "CS302",
+    "courseName": "Software Engineering",
+    "courseCode": "CS302",
+    "professorName": "Dr. Sharma",
+    "semester": "Spring 2026",
+    "academicYear": "2025-26",
+    "uploadedAt": "2026-03-12T10:30:00.000Z",
+    "students": [
+      {
+        "sno": 1,
+        "studentName": "Rahul Kumar",
+        "studentEmail": "rahul@gmail.com",
+        "studentRollNo": "BT22CSE001",
+        "midsem": 24,
+        "endsem": 46,
+        "quiz": 8,
+        "assignment": 9,
+        "totalMarks": 87,
+        "automatedGrade": "AB",
+        "manualGrade": "AA"
+      },
+      {
+        "sno": 2,
+        "studentName": "Priya Singh",
+        "studentEmail": "priya@gmail.com",
+        "studentRollNo": "BT22CSE002",
+        "midsem": 20,
+        "endsem": 40,
+        "quiz": 7,
+        "assignment": 8,
+        "totalMarks": 75,
+        "automatedGrade": "BB",
+        "manualGrade": "BB"
+      }
+    ],
+    "stats": {
+      "average": 81.2,
+      "min": 65,
+      "max": 95,
+      "stdDeviation": 8.3
+    },
+    "autoCutoffs": {
+      "AA": "90-100",
+      "AB": "80-89",
+      "BB": "70-79"
+    },
+    "manualCutoffs": {
+      "AA": "88-100",
+      "AB": "78-87",
+      "BB": "68-77"
+    }
+  }
+]

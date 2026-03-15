@@ -2,11 +2,11 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-const authRoutes = require("./routes/authRoutes");
+// const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");
-const uploadRoutes = require("./routes/uploadRoutes");
-const gradingRoutes = require("./routes/gradingRoutes");
-const statsRoutes = require("./routes/statsRoutes");
+// const uploadRoutes = require("./routes/uploadRoutes");
+// const gradingRoutes = require("./routes/gradingRoutes");
+// const statsRoutes = require("./routes/statsRoutes");
 
 const app = express();
 
@@ -22,11 +22,11 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api/auth", authRoutes);
+// app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/grading", gradingRoutes);
-app.use("/api/stats", statsRoutes);
+// app.use("/api/upload", uploadRoutes);
+// app.use("/api/grading", gradingRoutes);
+// app.use("/api/stats", statsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
