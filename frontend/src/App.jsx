@@ -23,7 +23,9 @@ function App() {
       <div className="App">
       <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/confirm-weightages" element={<ConfirmWeightages />} />
           <Route path="/previous-courses" element={<PreviousCourses />} />
