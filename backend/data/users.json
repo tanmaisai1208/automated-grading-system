@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "Professor One",
+    "email": "professor@example.com",
+    "password": "prof123",
+    "role": "professor",
+    "authProvider": "local"
+  },
+  {
+    "id": 2,
+    "name": "Student One",
+    "email": "student@example.com",
+    "password": "student123",
+    "role": "student",
+    "authProvider": "local"
+  }
+]
