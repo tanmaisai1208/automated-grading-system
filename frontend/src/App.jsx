@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { useAuth } from "./auth/AuthContext";
 import Login from "./pages/Login";
 import ScrollToTop from "./components/ScrollToTop";
 import Dashboard from './pages/dashboard';
@@ -23,9 +23,9 @@ function App() {
       <div className="App">
       <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
+          {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
+          {/* <Route path="/login" element={<Login />} /> */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/confirm-weightages" element={<ConfirmWeightages />} />
           <Route path="/previous-courses" element={<PreviousCourses />} />
