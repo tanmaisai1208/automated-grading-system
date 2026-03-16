@@ -4,6 +4,7 @@ import HelpModal from "../components/HelpModal";
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import { getAllCourses } from "../services/courseService";
+import { getStats } from "../services/statsService";
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -12,6 +13,7 @@ const Dashboard = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [courses, setCourses] = useState([]);
   const [totalStudents, setTotalStudents] = useState(0);
+  const [totalCourses, setTotalCourses] = useState(0);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -46,6 +48,30 @@ const Dashboard = () => {
 
   fetchCourses();
   }, []);
+
+  useEffect(() => {
+
+  const fetchStats = async () => {
+
+    try {
+
+      const response = await getStats();
+
+      if (response.stats) {
+        setTotalCourses(response.stats.totalCourses);
+      }
+
+    } catch (error) {
+
+      console.error("Error fetching stats:", error);
+
+    }
+
+  };
+
+  fetchStats();
+
+}, []);
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -124,7 +150,7 @@ const Dashboard = () => {
                 <div className="stat-content">
                   <p className="stat-label">Total Courses</p>
                   <div className="stat-value-wrapper">
-                    <p className="stat-value">{courses.length}</p>
+                    <p className="stat-value">{totalCourses || courses.length}</p>
                     <span className="stat-trend trend-positive">+3 this semester</span>
                   </div>
                 </div>
@@ -255,7 +281,7 @@ const Dashboard = () => {
                     </svg>
                   </button>
                   <div className="card-meta">
-                    <span>{courses.length} Courses</span>
+                    <span>{totalCourses || courses.length} Courses</span>
                     <span className="meta-separator">•</span>
                     <span>{totalStudents} Students</span>
                   </div>

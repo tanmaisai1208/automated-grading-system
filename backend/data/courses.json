@@ -18,7 +18,7 @@
         "quiz": 8,
         "assignment": 9,
         "totalMarks": 87,
-        "automatedGrade": "AB",
+        "automatedGrade": "AA",
         "manualGrade": "AA"
       },
       {
@@ -31,8 +31,8 @@
         "quiz": 7,
         "assignment": 8,
         "totalMarks": 75,
-        "automatedGrade": "BB",
-        "manualGrade": "BB"
+        "automatedGrade": "AA",
+        "manualGrade": "AA"
       }
     ],
     "stats": {
@@ -41,15 +41,40 @@
       "max": 95,
       "stdDeviation": 8.3
     },
-    "autoCutoffs": {
-      "AA": "90-100",
-      "AB": "80-89",
-      "BB": "70-79"
+    "autoCutoffs": {},
+    "manualCutoffs": {}
+  },
+
+  {
+    "courseId": "CS303",
+    "courseName": "Operating Systems",
+    "courseCode": "CS303",
+    "professorName": "Dr. Mehta",
+    "semester": "Spring 2026",
+    "academicYear": "2025-26",
+    "uploadedAt": "2026-03-13T10:30:00.000Z",
+    "students": [
+      {
+        "sno": 1,
+        "studentName": "Aman Verma",
+        "studentEmail": "aman@gmail.com",
+        "studentRollNo": "BT22CSE003",
+        "midsem": 18,
+        "endsem": 42,
+        "quiz": 6,
+        "assignment": 8,
+        "totalMarks": 74,
+        "automatedGrade": "AA",
+        "manualGrade": "AA"
+      }
+    ],
+    "stats": {
+      "average": 74,
+      "min": 74,
+      "max": 74,
+      "stdDeviation": 0
     },
-    "manualCutoffs": {
-      "AA": "88-100",
-      "AB": "78-87",
-      "BB": "68-77"
-    }
+    "autoCutoffs": {},
+    "manualCutoffs": {}
   }
 ]
