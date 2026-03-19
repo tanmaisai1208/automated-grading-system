@@ -1,23 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import "./automatedGrade.css";
 
 export default function AutomatedGrade() {
-  const [students] = useState([
-    { id: 1, name: "Alice", marks: 88, grade: "AA" },
-    { id: 2, name: "Bob", marks: 72, grade: "BB" },
-    { id: 3, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 4, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 5, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 6, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 7, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 8, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 9, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 10, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 11, name: "Charlie", marks: 59, grade: "CC" },
-    { id: 12, name: "Charlie", marks: 59, grade: "CC" },
-  ]);
+  const [courses, setCourses] = useState([]);
+  const [courseId, setCourseId] = useState("");
+  const [students, setStudents] = useState([]);
 
   const [weightages, setWeightages] = useState({
     assignments: 30,
@@ -32,6 +21,69 @@ export default function AutomatedGrade() {
     BC: 60,
     CC: 50,
   });
+
+  // 🔥 Fetch all courses
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/courses");
+      const data = await res.json();
+
+      if (data.success) {
+        setCourses(data.courses);
+
+        if (data.courses.length > 0) {
+          setCourseId(data.courses[0].courseId);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+    }
+  };
+
+  // 🔥 Fetch grades
+const fetchGrades = async () => {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/grading/${courseId}`
+    );
+    const data = await res.json();
+
+    if (data.success) {
+      setStudents(data.grades);
+    } else {
+      setStudents([]); // 🔥 CLEAR OLD DATA
+    }
+  } catch (err) {
+    console.error("Error fetching grades:", err);
+    setStudents([]); // 🔥 also clear on error
+  }
+};
+
+  // 🔥 Compute grades
+  const computeGrades = async () => {
+    try {
+      await fetch(
+        `http://localhost:5000/api/grading/compute/${courseId}`,
+        {
+          method: "POST",
+        }
+      );
+
+      fetchGrades();
+    } catch (err) {
+      console.error("Error computing grades:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  useEffect(() => {
+    if (courseId) {
+      fetchGrades();
+    }
+  }, [courseId]);
 
   const handleWeightChange = (key, value) => {
     setWeightages({ ...weightages, [key]: value });
@@ -49,10 +101,26 @@ export default function AutomatedGrade() {
         <div className="auto-grade-container">
 
           <h1 className="page-title">Computed Grades</h1>
-          <p className="page-subtitle">
-            Automatically generated grades based on analytics.
-            You may adjust weightages and cutoffs.
-          </p>
+
+          {/* 🔥 COURSE DROPDOWN */}
+          <div style={{ marginBottom: "20px" }}>
+            <label>Select Course: </label>
+            <select
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+            >
+              {courses.map((c) => (
+                <option key={c.courseId} value={c.courseId}>
+                  {c.courseName} ({c.courseId})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 🔥 COMPUTE BUTTON */}
+          <button className="compute-btn" onClick={computeGrades}>
+            Compute Grades
+          </button>
 
           <div className="auto-layout">
 
@@ -64,19 +132,19 @@ export default function AutomatedGrade() {
                 <table className="student-table">
                   <thead>
                     <tr>
-                      <th>ID</th>
                       <th>Name</th>
-                      <th>Marks</th>
+                      <th>Roll No</th>
+                      <th>Total Marks</th>
                       <th>Grade</th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    {students.map((s) => (
-                      <tr key={s.id}>
-                        <td>{s.id}</td>
-                        <td>{s.name}</td>
-                        <td>{s.marks}</td>
+                    {students.map((s, index) => (
+                      <tr key={index}>
+                        <td>{s.studentName}</td>
+                        <td>{s.studentRollNo}</td>
+                        <td>{s.totalMarks}</td>
                         <td className="auto-grade">{s.grade}</td>
                       </tr>
                     ))}
@@ -93,13 +161,6 @@ export default function AutomatedGrade() {
                 <h2 className="section-title">Weightages</h2>
 
                 <table className="grade-table">
-                  <thead>
-                    <tr>
-                      <th>Component</th>
-                      <th>Weight</th>
-                    </tr>
-                  </thead>
-
                   <tbody>
                     {Object.entries(weightages).map(([k, v]) => (
                       <tr key={k}>
@@ -124,13 +185,6 @@ export default function AutomatedGrade() {
                 <h2 className="section-title">Grade Cutoffs</h2>
 
                 <table className="grade-table">
-                  <thead>
-                    <tr>
-                      <th>Grade</th>
-                      <th>Min Marks</th>
-                    </tr>
-                  </thead>
-
                   <tbody>
                     {Object.entries(cutoffs).map(([g, v]) => (
                       <tr key={g}>
