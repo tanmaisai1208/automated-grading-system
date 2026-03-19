@@ -33,46 +33,50 @@ This is a dashboard web application where users can view courses, upload marks, 
   
 ---
 
-## 3. Installation (Dependencies)
+## 3. Installation
 
-Install all required dependencies.
+### Clone the Repository
+```bash
+git clone <your-repo-link>
+cd <your-project-folder>
+```
 
-### Frontend Dependencies
+### Install Frontend Dependencies
 ```bash
 npm install
 ```
 
-### Backend Dependencies
+### Install Backend Dependencies
 ```bash
 cd backend
 npm install
+cd ..
 ```
 
 ---
 
-## 4. How to Run the Project
+## 4. Running the Project
 
-### Install Dependencies
-```bash
-npm install
-```
-
-### Run Frontend Server
-```bash
-npm run dev
-```
-
-The frontend will run at:  
-http://localhost:5173
-
-### Run Backend Server
+### Step 1: Start Backend Server (IMPORTANT)
 ```bash
 cd backend
 npm run dev
 ```
 
-The backend will run at:  
+Backend runs at:  
 http://localhost:5000
+
+---
+
+### Step 2: Start Frontend Server
+(Open a new terminal)
+
+```bash
+npm run dev
+```
+
+Frontend runs at:  
+http://localhost:5173
 
 ---
 
