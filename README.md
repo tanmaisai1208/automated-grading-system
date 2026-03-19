@@ -12,12 +12,25 @@ This is a dashboard web application where users can view courses, upload marks, 
 - React Router DOM
 - Vite
 
+### Backend
+- Node.js
+- Express.js
+
+### File Handling & Data Processing
+- Multer (for file uploads)
+- XLSX (for Excel file processing)
+
+### Middleware & Utilities
+- CORS (cross-origin requests)
+- Dotenv (environment configuration)
+
 ### Styling
 - CSS
 
 ### Development Tools
+- Nodemon
 - ESLint
-
+  
 ---
 
 ## 3. Installation (Dependencies)
