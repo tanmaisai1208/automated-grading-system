@@ -40,6 +40,9 @@ Backend Server
 cd backend
 npm run dev
 
+The application will run at:
+http://localhost:5000
+
 ## 5. Website Pages & Usage
 Website Pages & Functionality
 Dashboard Page
