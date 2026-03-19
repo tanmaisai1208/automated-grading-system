@@ -22,7 +22,7 @@ const computeGrades = async (courseId) => {
   const config = gradeConfigs[courseId] || defaultBoundaries;
 
   const graded = students.map((student) => {
-    const marks = student.total || student.marks || 0;
+    const marks = student.totalMarks  || student.total || 0;
 
     let assignedGrade = "F";
 
