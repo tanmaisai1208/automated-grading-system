@@ -44,23 +44,55 @@ The application will run at:
 http://localhost:5000
 
 ## 5. Website Pages & Usage
-Website Pages & Functionality
-Dashboard Page
 
-Main page of the application
+### 🔹 Automated Grade Page
+- Performs automatic grade calculation based on uploaded marks.  
+- Applies grading logic and displays final computed grades.  
 
-Provides navigation to different sections
+---
 
-Displays overview of data
+### 🔹 Confirm Weightages Page
+- Allows users to define weight distribution (assignments, exams, etc.).  
+- Confirms grading criteria before final grade calculation.  
 
-Previous Courses Page
+---
 
-Shows list of completed courses
+### 🔹 Course Details Page
+- Displays detailed information about a selected course.  
+- Shows student data, marks, and course structure.  
 
-Helps users review past academic records
+---
 
-Upload Marks Page
+### 🔹 Dashboard Page
+- Acts as the main homepage after login.  
+- Provides navigation to all major features of the system.  
 
-Allows users to upload or update marks
+---
 
-Stores and manages academic performance data
+### 🔹 Login Page
+- Handles user login and authentication process.  
+- Restricts access to authorized users only.  
+
+---
+
+### 🔹 Manual Grade Adjustment Page
+- Allows manual modification of generated grades.  
+- Helps instructors fine-tune grading results.  
+
+---
+
+### 🔹 Previous Courses Page
+- Displays list of previously created courses.  
+- Allows users to review past course data.  
+
+---
+
+### 🔹 Statistical Analysis Page
+- Provides analysis of student performance data.  
+- Shows metrics like average, distribution, etc.  
+
+---
+
+### 🔹 Upload Marks Page
+- Allows uploading of student marks (file/manual input).  
+- Serves as input source for grading process.
