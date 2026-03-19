@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 // app.use("/api/upload", uploadRoutes);
-// app.use("/api/grading", gradingRoutes);
+app.use("/api/grading", gradingRoutes);
 app.use("/api/stats", statsRoutes);
 
 app.use((req, res) => {
