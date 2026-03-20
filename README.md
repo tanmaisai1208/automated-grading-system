@@ -1,4 +1,4 @@
-# Project Title
+# Automated Grading System
 
 ## 1. Introduction
 This is a dashboard web application where users can view courses, upload marks, and manage academic data.
