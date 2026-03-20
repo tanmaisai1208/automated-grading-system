@@ -37,8 +37,8 @@ This is a dashboard web application where users can view courses, upload marks, 
 
 ### Clone the Repository
 ```bash
-git clone <your-repo-link>
-cd <your-project-folder>
+git clone https://github.com/tanmaisai1208/automated-grading-system.git
+cd automated-grading-system
 ```
 
 ### Install Frontend Dependencies
