@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fileUpload = require("express-fileupload"); 
 
 const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");
@@ -13,6 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload()); // ✅ enables file upload
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -24,7 +26,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
-// app.use("/api/upload", uploadRoutes);
+app.use("/api/upload", uploadRoutes); 
 app.use("/api/grading", gradingRoutes);
 app.use("/api/stats", statsRoutes);
 

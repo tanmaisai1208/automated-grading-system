@@ -17,7 +17,7 @@ This is a dashboard web application where users can view courses, upload marks, 
 - Express.js
 
 ### File Handling & Data Processing
-- Multer (for file uploads)
+- Express-Fileupload (for file uploads)
 - XLSX (for Excel file processing)
 
 ### Middleware & Utilities

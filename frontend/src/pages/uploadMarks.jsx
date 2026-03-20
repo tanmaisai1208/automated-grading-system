@@ -11,23 +11,33 @@ const UploadMarks = () => {
   const [coordinators, setCoordinators] = useState("");
   const [file, setFile] = useState(null);
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!courseName || !batch || !file) {
       alert("Please fill all required fields and select an Excel file");
       return;
     }
 
-    const uploadData = {
-      courseName,
-      batch,
-      coordinators,
-      fileName: file.name,
-    };
+    const formData = new FormData();
+    formData.append("courseName", courseName);
+    formData.append("batch", batch);
+    formData.append("coordinators", coordinators);
+    formData.append("file", file);
 
-    console.log("Upload Data:", uploadData);
+    try {
+      const res = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    // Navigate to Confirm Weightages page
-    navigate("/confirm-weightages");
+      const data = await res.json();
+      console.log(data);
+
+      navigate("/confirm-weightages", { state: data });
+
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    }
   };
 
   return (
