@@ -1,224 +1,158 @@
 [
   {
-    "courseId": "CS302",
-    "courseName": "Data Structures",
-    "courseCode": "CS302",
-    "professorName": "Dr. Sharma",
-    "semester": "Monsoon",
+    "courseId": "cs 202",
+    "courseName": "cs 202",
+    "courseCode": "cs 202",
+    "professorName": "",
+    "semester": "27",
     "academicYear": "2025-26",
-    "uploadedAt": "2026-03-23T10:30:00.000Z",
-
+    "uploadedAt": "2026-03-27T11:44:54.702Z",
     "students": [
       {
         "sno": 1,
-        "name": "Alice Johnson",
-        "roll": "CS21B001",
-
-        "componentMarks": {
-          "midsem": 28,
-          "endsem": 52,
-          "quiz1": 8,
-          "quiz2": 7,
-          "assignment1": 9,
-          "assignment2": 10
-        },
-
-        "rawTotal": 114,
-        "normalizedTotal": 81.43,
-        "total": 81.43,
-
-        "autoGrade": "AB",
-        "manualGrade": "BB",
-
-        "status": "computed",
-        "remarks": ""
+        "studentName": "Rahul",
+        "studentRollNo": "BT22CSE001",
+        "midsem": 24,
+        "endsem": 46,
+        "quiz": 8,
+        "assignment": 9,
+        "totalMarks": 87,
+        "automatedGrade": "",
+        "manualGrade": ""
+      },
+      {
+        "sno": 2,
+        "studentName": "Priya",
+        "studentRollNo": "BT22CSE002",
+        "midsem": 20,
+        "endsem": 40,
+        "quiz": 7,
+        "assignment": 8,
+        "totalMarks": 75,
+        "automatedGrade": "",
+        "manualGrade": ""
+      },
+      {
+        "sno": 3,
+        "studentName": "Amit",
+        "studentRollNo": "BT22CSE003",
+        "midsem": 18,
+        "endsem": 35,
+        "quiz": 6,
+        "assignment": 7,
+        "totalMarks": 66,
+        "automatedGrade": "",
+        "manualGrade": ""
+      },
+      {
+        "sno": 4,
+        "studentName": "Sneha",
+        "studentRollNo": "BT22CSE004",
+        "midsem": 30,
+        "endsem": 48,
+        "quiz": 9,
+        "assignment": 10,
+        "totalMarks": 97,
+        "automatedGrade": "",
+        "manualGrade": ""
+      },
+      {
+        "sno": 5,
+        "studentName": "Kiran",
+        "studentRollNo": "BT22CSE005",
+        "midsem": 22,
+        "endsem": 38,
+        "quiz": 7,
+        "assignment": 6,
+        "totalMarks": 73,
+        "automatedGrade": "",
+        "manualGrade": ""
       }
     ],
-
     "stats": {
-      "studentCount": 1,
-      "mean": 81.43,
-      "median": 81.43,
-      "min": 81.43,
-      "max": 81.43,
-      "stdDev": 0,
-      "passCount": 1,
-      "failCount": 0,
-
-      "gradeDistribution": {
-        "AA": 0,
-        "AB": 1,
-        "BB": 0,
-        "BC": 0,
-        "CC": 0,
-        "CD": 0,
-        "DD": 0,
-        "FF": 0
-      },
-
-      "componentStats": {
-        "midsem": {
-          "mean": 28,
-          "max": 28,
-          "min": 28
-        },
-        "endsem": {
-          "mean": 52,
-          "max": 52,
-          "min": 52
-        },
-        "quiz1": {
-          "mean": 8,
-          "max": 8,
-          "min": 8
-        },
-        "quiz2": {
-          "mean": 7,
-          "max": 7,
-          "min": 7
-        },
-        "assignment1": {
-          "mean": 9,
-          "max": 9,
-          "min": 9
-        },
-        "assignment2": {
-          "mean": 10,
-          "max": 10,
-          "min": 10
-        }
-      }
+      "average": 79.6,
+      "min": 66,
+      "max": 97
     },
-
-    "autoCutoffs": {
-      "AA": 95,
-      "AB": 85,
-      "BB": 75,
-      "BC": 65,
-      "CC": 55,
-      "CD": 45,
-      "DD": 35,
-      "FF": 0
-    },
-
-    "manualCutoffs": {
-      "AA": 93,
-      "AB": 83,
-      "BB": 73,
-      "BC": 63,
-      "CC": 53,
-      "CD": 43,
-      "DD": 33,
-      "FF": 0
-    },
-
-    "uploadMeta": {
-      "originalFileName": "cs302_marksheet.xlsx",
-      "storedFileName": "1742706600000-cs302_marksheet.xlsx",
-      "filePath": "uploads/1742706600000-cs302_marksheet.xlsx",
-      "sheetName": "Sheet1",
-      "uploadedBy": "professor1@example.com",
-      "uploadStatus": "success"
-    },
-
-    "components": [
+    "autoCutoffs": {},
+    "manualCutoffs": {}
+  },
+  {
+    "courseId": "cs 302",
+    "courseName": "cs 302",
+    "courseCode": "cs 302",
+    "professorName": "",
+    "semester": "28",
+    "academicYear": "2025-26",
+    "uploadedAt": "2026-03-27T11:46:11.262Z",
+    "students": [
       {
-        "key": "midsem",
-        "label": "Mid Sem",
-        "maxMarks": 30,
-        "weightage": 25,
-        "originalColumnName": "Mid Sem (30)[25%]",
-        "includedInTotal": true
+        "sno": 1,
+        "studentName": "Rahul",
+        "studentRollNo": "BT22CSE001",
+        "midsem": 24,
+        "endsem": 46,
+        "quiz": 8,
+        "assignment": 9,
+        "totalMarks": 87,
+        "automatedGrade": "",
+        "manualGrade": ""
       },
       {
-        "key": "endsem",
-        "label": "End Sem",
-        "maxMarks": 60,
-        "weightage": 40,
-        "originalColumnName": "End Sem (60)[40%]",
-        "includedInTotal": true
+        "sno": 2,
+        "studentName": "Priya",
+        "studentRollNo": "BT22CSE002",
+        "midsem": 20,
+        "endsem": 40,
+        "quiz": 7,
+        "assignment": 8,
+        "totalMarks": 75,
+        "automatedGrade": "",
+        "manualGrade": ""
       },
       {
-        "key": "quiz1",
-        "label": "Quiz 1",
-        "maxMarks": 10,
-        "weightage": 5,
-        "originalColumnName": "Quiz 1 (10)[5%]",
-        "includedInTotal": true
+        "sno": 3,
+        "studentName": "Amit",
+        "studentRollNo": "BT22CSE003",
+        "midsem": 18,
+        "endsem": 35,
+        "quiz": 6,
+        "assignment": 7,
+        "totalMarks": 66,
+        "automatedGrade": "",
+        "manualGrade": ""
       },
       {
-        "key": "quiz2",
-        "label": "Quiz 2",
-        "maxMarks": 10,
-        "weightage": 5,
-        "originalColumnName": "Quiz 2 (10)[5%]",
-        "includedInTotal": true
+        "sno": 4,
+        "studentName": "Sneha",
+        "studentRollNo": "BT22CSE004",
+        "midsem": 30,
+        "endsem": 48,
+        "quiz": 9,
+        "assignment": 10,
+        "totalMarks": 97,
+        "automatedGrade": "",
+        "manualGrade": ""
       },
       {
-        "key": "assignment1",
-        "label": "Assignment 1",
-        "maxMarks": 10,
-        "weightage": 10,
-        "originalColumnName": "Assignment 1 (10)[10%]",
-        "includedInTotal": true
-      },
-      {
-        "key": "assignment2",
-        "label": "Assignment 2",
-        "maxMarks": 10,
-        "weightage": 15,
-        "originalColumnName": "Assignment 2 (10)[15%]",
-        "includedInTotal": true
+        "sno": 5,
+        "studentName": "Kiran",
+        "studentRollNo": "BT22CSE005",
+        "midsem": 22,
+        "endsem": 38,
+        "quiz": 7,
+        "assignment": 6,
+        "totalMarks": 73,
+        "automatedGrade": "",
+        "manualGrade": ""
       }
     ],
-
-    "calculationConfig": {
-      "totalWeightage": 100,
-      "normalizationBase": 100,
-      "weightageConfirmed": true,
-      "gradingMethod": "mean-as-BB-std-half-step",
-      "gradeScale": ["AA", "AB", "BB", "BC", "CC", "CD", "DD", "FF"],
-      "lastComputedAt": "2026-03-23T10:35:00.000Z",
-      "lastManualAdjustmentAt": "2026-03-23T10:50:00.000Z"
+    "stats": {
+      "average": 79.6,
+      "min": 66,
+      "max": 97
     },
-
-    "workflowStatus": {
-      "excelUploaded": true,
-      "parsed": true,
-      "weightageConfirmed": true,
-      "autoGradesGenerated": true,
-      "manualGradesGenerated": true,
-      "statisticsGenerated": true,
-      "finalized": true
-    },
-
-    "tableColumns": [
-      "sno",
-      "name",
-      "email",
-      "roll",
-      "midsem",
-      "endsem",
-      "quiz1",
-      "quiz2",
-      "assignment1",
-      "assignment2",
-      "total",
-      "autoGrade",
-      "manualGrade"
-    ],
-
-    "rawHeaders": [
-      "S.No",
-      "Student Name",
-      "Student Email",
-      "Student Roll No",
-      "Mid Sem (30)[25%]",
-      "End Sem (60)[40%]",
-      "Quiz 1 (10)[5%]",
-      "Quiz 2 (10)[5%]",
-      "Assignment 1 (10)[10%]",
-      "Assignment 2 (10)[15%]"
-    ]
+    "autoCutoffs": {},
+    "manualCutoffs": {}
   }
 ]

@@ -14,6 +14,8 @@ const Dashboard = () => {
   const [courses, setCourses] = useState([]);
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalCourses, setTotalCourses] = useState(0);
+  const [avgMarks, setAvgMarks] = useState(0);
+  const [avgGrade, setAvgGrade] = useState("--");
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -27,7 +29,7 @@ const Dashboard = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
   const fetchCourses = async () => {
     try {
       const response = await getAllCourses();
@@ -36,18 +38,47 @@ const Dashboard = () => {
       setCourses(fetchedCourses);
 
       const studentCount = fetchedCourses.reduce(
-        (sum, course) => sum + (course.totalStudents || 0),
+        (sum, course) => sum + (course.students?.length || 0),
         0
       );
 
       setTotalStudents(studentCount);
+
+      // ✅ calculate average marks
+      let totals = [];
+
+      fetchedCourses.forEach(course => {
+        (course.students || []).forEach(s => {
+          if (s.totalMarks !== undefined) {
+            totals.push(s.totalMarks);
+          }
+        });
+      });
+
+      if (totals.length > 0) {
+        const avg =
+          totals.reduce((a, b) => a + b, 0) / totals.length;
+
+        // convert to grade
+        let grade = "--";
+
+        if (avg >= 90) grade = "AA";
+        else if (avg >= 80) grade = "AB";
+        else if (avg >= 70) grade = "BB";
+        else if (avg >= 60) grade = "BC";
+        else if (avg >= 50) grade = "CC";
+        else grade = "DD";
+
+        setAvgGrade(grade);
+      }
+
     } catch (error) {
-      console.error("Error fetching dashboard course data:", error);
+      console.error(error);
     }
   };
 
   fetchCourses();
-  }, []);
+}, []);
 
   useEffect(() => {
 
@@ -151,7 +182,9 @@ const Dashboard = () => {
                   <p className="stat-label">Total Courses</p>
                   <div className="stat-value-wrapper">
                     <p className="stat-value">{totalCourses || courses.length}</p>
-                    <span className="stat-trend trend-positive">+3 this semester</span>
+                    <span className="stat-trend trend-positive">
+                      +{courses.length} this semester
+                    </span>
                   </div>
                 </div>
                 <div className="stat-progress">
@@ -181,7 +214,9 @@ const Dashboard = () => {
                   <p className="stat-label">Active Students</p>
                   <div className="stat-value-wrapper">
                     <p className="stat-value">{totalStudents}</p>
-                    <span className="stat-trend trend-positive">↑ 12% growth</span>
+                    <span className="stat-trend trend-positive">
+                      ↑ {totalStudents} active
+                    </span>
                   </div>
                 </div>
                 <div className="stat-progress">
@@ -208,8 +243,13 @@ const Dashboard = () => {
                 <div className="stat-content">
                   <p className="stat-label">Average Grade</p>
                   <div className="stat-value-wrapper">
-                    <p className="stat-value">BB+</p>
-                    <span className="stat-trend trend-neutral">Stable</span>
+                    <p className="stat-value">
+  {avgMarks ? avgMarks.toFixed(1) : "--"}
+</p>
+
+<span className="stat-trend trend-neutral">
+  {"Class performance"}
+</span>
                   </div>
                 </div>
                 <div className="stat-progress">

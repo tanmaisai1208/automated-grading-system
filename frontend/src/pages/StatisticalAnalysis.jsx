@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import "./StatisticalAnalysis.css";
+import { useState, useEffect } from "react";
 
 import {
   Chart as ChartJS,
@@ -92,25 +93,43 @@ function normalPdf(x, mu, sigma) {
 }
 
 const StatisticalAnalysis = () => {
-  const { courseid } = useParams();
+  const { courseId } = useParams();
 
-  // Dummy totals & component marks (replace with API later)
-  const dataRows = useMemo(() => {
-    // You will replace this with backend response for the given courseid.
-    // Keep structure: total (0-100), gradeAuto, gradeManual, components.
-    return [
-      { total: 81, gradeAuto: "BB", gradeManual: "AB", mid: 28, end: 40, quiz: 5, assignment: 8 },
-      { total: 69, gradeAuto: "BC", gradeManual: "BC", mid: 22, end: 34, quiz: 4, assignment: 9 },
-      { total: 92, gradeAuto: "AB", gradeManual: "AA", mid: 32, end: 46, quiz: 6, assignment: 8 },
-      { total: 55, gradeAuto: "CC", gradeManual: "CC", mid: 18, end: 28, quiz: 3, assignment: 6 },
-      { total: 76, gradeAuto: "BB", gradeManual: "BB", mid: 25, end: 38, quiz: 5, assignment: 8 },
-      { total: 64, gradeAuto: "BC", gradeManual: "BC", mid: 20, end: 33, quiz: 4, assignment: 7 },
-      { total: 88, gradeAuto: "AB", gradeManual: "AB", mid: 30, end: 44, quiz: 6, assignment: 8 },
-      { total: 47, gradeAuto: "CD", gradeManual: "DD", mid: 14, end: 24, quiz: 3, assignment: 6 },
-      { total: 73, gradeAuto: "BB", gradeManual: "BB", mid: 24, end: 37, quiz: 4, assignment: 8 },
-      { total: 60, gradeAuto: "CC", gradeManual: "CC", mid: 19, end: 31, quiz: 4, assignment: 6 },
-    ];
-  }, []);
+ 
+const [dataRows, setDataRows] = useState([]);
+
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/courses/${courseId}`
+      );
+
+      const data = await res.json();
+
+      const students =
+        data.course?.students ||
+        data.students ||
+        [];
+
+      const rows = students.map((s) => ({
+        total: s.totalMarks || 0,
+        gradeAuto: s.automatedGrade || "",
+        gradeManual: s.manualGrade || "",
+        mid: s.midsem || 0,
+        end: s.endsem || 0,
+        quiz: s.quiz || 0,
+        assignment: s.assignment || 0,
+      }));
+
+      setDataRows(rows);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
+  };
+
+  fetchStats();
+}, [courseId]);
 
   const totals = useMemo(() => dataRows.map((r) => r.total), [dataRows]);
 
