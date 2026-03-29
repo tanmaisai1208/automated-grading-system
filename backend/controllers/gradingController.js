@@ -9,8 +9,8 @@ const computeGrades = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Grades computed successfully",
-      data: result,
+      message: "Grades computed and saved to courses.json",
+      students: result,
     });
   } catch (error) {
     next(error);

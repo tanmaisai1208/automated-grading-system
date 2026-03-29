@@ -1,68 +1,86 @@
-const courseService = require("./courseService");
+const fs = require("fs");
+const path = require("path");
 
-// In-memory storage (replace with DB later)
-let gradeConfigs = {};
-let computedGrades = {};
+const coursesFile = path.join(__dirname, "../data/courses.json");
 
-/* Default grade boundaries */
-const defaultBoundaries = [
-  { grade: "A", min: 85 },
-  { grade: "B", min: 70 },
-  { grade: "C", min: 55 },
-  { grade: "D", min: 40 },
-  { grade: "F", min: 0 },
-];
+/* Read courses.json */
+function readCourses() {
+  const data = fs.readFileSync(coursesFile, "utf8");
+  return JSON.parse(data);
+}
 
-/* Compute grades */
+/* Write courses.json */
+function writeCourses(data) {
+  fs.writeFileSync(coursesFile, JSON.stringify(data, null, 2));
+}
+
+/* Mean */
+function calculateMean(arr) {
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+/* Standard deviation */
+function calculateStdDev(arr, mean) {
+  const variance =
+    arr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+    arr.length;
+  return Math.sqrt(variance);
+}
+
+/* Relative grade */
+function getGrade(marks, mean, sd) {
+  if (marks >= mean + 1.5 * sd) return "AA";
+  if (marks >= mean + 0.5 * sd) return "AB";
+  if (marks >= mean) return "BB";
+  if (marks >= mean - 0.5 * sd) return "BC";
+  if (marks >= mean - sd) return "CC";
+  if (marks >= mean - 1.5 * sd) return "CD";
+  if (marks >= mean - 2 * sd) return "DD";
+  return "F";
+}
+
+/* Compute grades and UPDATE courses.json */
 const computeGrades = async (courseId) => {
-  const students = await courseService.getCourseStudentsTable(courseId);
+  const courses = readCourses();
 
-  if (!students) return null;
+  const course = courses.find(
+    (c) => c.courseId.toLowerCase() === courseId.toLowerCase()
+  );
 
-  const config = gradeConfigs[courseId] || defaultBoundaries;
+  if (!course) return null;
 
-  const graded = students.map((student) => {
-    const marks = student.totalMarks  || student.total || 0;
+  const marksArray = course.students.map((s) => s.totalMarks);
+  const mean = calculateMean(marksArray);
+  const sd = calculateStdDev(marksArray, mean);
 
-    let assignedGrade = "F";
-
-    for (let boundary of config) {
-      if (marks >= boundary.min) {
-        assignedGrade = boundary.grade;
-        break;
-      }
-    }
-
-    return {
-      ...student,
-      grade: assignedGrade,
-    };
+  course.students.forEach((student) => {
+    const grade = getGrade(student.totalMarks, mean, sd);
+    student.automatedGrade = grade;
   });
 
-  computedGrades[courseId] = graded;
+  // save stats also
+  course.stats.mean = mean;
+  course.stats.standardDeviation = sd;
 
-  return graded;
+  writeCourses(courses);
+
+  return course.students;
 };
 
 /* Get grades */
 const getGradesByCourse = async (courseId) => {
-  return computedGrades[courseId] || null;
-};
+  const courses = readCourses();
 
-/* Set grading config */
-const setGradeConfig = async (courseId, config) => {
-  gradeConfigs[courseId] = config;
-  return config;
-};
+  const course = courses.find(
+    (c) => c.courseId.toLowerCase() === courseId.toLowerCase()
+  );
 
-/* Get grading config */
-const getGradeConfig = async (courseId) => {
-  return gradeConfigs[courseId] || defaultBoundaries;
+  if (!course) return null;
+
+  return course.students;
 };
 
 module.exports = {
   computeGrades,
   getGradesByCourse,
-  setGradeConfig,
-  getGradeConfig,
 };

@@ -17,7 +17,7 @@
         "quiz": 8,
         "assignment": 9,
         "totalMarks": 87,
-        "automatedGrade": "",
+        "automatedGrade": "AB",
         "manualGrade": ""
       },
       {
@@ -29,7 +29,7 @@
         "quiz": 7,
         "assignment": 8,
         "totalMarks": 75,
-        "automatedGrade": "",
+        "automatedGrade": "BC",
         "manualGrade": ""
       },
       {
@@ -41,7 +41,7 @@
         "quiz": 6,
         "assignment": 7,
         "totalMarks": 66,
-        "automatedGrade": "",
+        "automatedGrade": "CD",
         "manualGrade": ""
       },
       {
@@ -53,7 +53,7 @@
         "quiz": 9,
         "assignment": 10,
         "totalMarks": 97,
-        "automatedGrade": "",
+        "automatedGrade": "AA",
         "manualGrade": ""
       },
       {
@@ -65,14 +65,16 @@
         "quiz": 7,
         "assignment": 6,
         "totalMarks": 73,
-        "automatedGrade": "",
+        "automatedGrade": "CC",
         "manualGrade": ""
       }
     ],
     "stats": {
       "average": 79.6,
       "min": 66,
-      "max": 97
+      "max": 97,
+      "mean": 79.6,
+      "standardDeviation": 11.01998185116473
     },
     "autoCutoffs": {},
     "manualCutoffs": {}
