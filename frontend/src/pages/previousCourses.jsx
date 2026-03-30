@@ -92,33 +92,41 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
 import { getAllCourses } from "../services/courseService";
-import { useAuth } from "../auth/AuthContext"; // ✅ IMPORTANT
+import { useAuth } from "../auth/AuthContext";
 import "./previousCourses.css";
 
 const PreviousCourses = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // ✅ get logged-in user
+  const { user } = useAuth();
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ wait until user is available
-    if (!user) return;
+    // 🔥 STRICT AUTH CHECK
+    if (!user) {
+      navigate("/login");
+      return;
+    }
 
     const fetchCourses = async () => {
       try {
-        const data = await getAllCourses(); // ✅ use service
+        const data = await getAllCourses();
         setCourses(data.courses);
       } catch (error) {
         console.error("Error fetching courses:", error);
+
+        // 🔥 HANDLE UNAUTHORIZED FROM BACKEND
+        if (error.message === "Unauthorized") {
+          navigate("/login");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchCourses();
-  }, [user]);
+  }, [user, navigate]);
 
   return (
     <div className="previous-wrapper">
@@ -135,13 +143,13 @@ const PreviousCourses = () => {
             </p>
           </div>
 
-          {/* ✅ Loading State */}
+          {/* Loading */}
           {loading ? (
             <p>Loading courses...</p>
           ) : (
             <div className="courses-grid">
               {courses.length === 0 ? (
-                <p>No courses found.</p>
+                <p style={{ color: "#0f172a" }}>No courses found.</p>
               ) : (
                 courses.map((course) => (
                   <div key={course.courseId} className="course-card">
