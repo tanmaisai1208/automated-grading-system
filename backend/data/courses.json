@@ -1,7 +1,7 @@
 [
   {
     "courseId": "cs 202",
-    "courseName": "cs 202",
+    "courseName": "DSA",
     "courseCode": "cs 202",
     "professorId": 1,
     "professorName": "",
@@ -82,7 +82,7 @@
   },
   {
     "courseId": "cs 302",
-    "courseName": "cs 302",
+    "courseName": "OS",
     "courseCode": "cs 302",
     "professorName": "",
     "professorId": 1,

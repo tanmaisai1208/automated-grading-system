@@ -6,7 +6,14 @@ const getAllCourses = async (req, res, next) => {
     console.log("SESSION USER:", req.session.user);
 
     const courses = await courseService.getAllCourses(req.session.user);
-
+    const user = req.session.user || null;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not logged in",
+      });
+    }
+    
     res.status(200).json({
       success: true,
       count: courses.length,
