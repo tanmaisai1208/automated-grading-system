@@ -13,6 +13,7 @@
     "email": "student@example.com",
     "password": "student123",
     "role": "student",
+    "rollNo": "BT22CSE007",
     "authProvider": "local"
   }
 ]

@@ -3,11 +3,29 @@ const courseService = require("../services/courseService");
 
 exports.uploadExcel = async (req, res) => {
   try {
-
     console.log("BODY:", req.body);
 
     const { courseName, batch, coordinators } = req.body;
 
+    // ✅ CHECK LOGIN (NEW)
+    const user = req.session.user;
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Please login first",
+      });
+    }
+
+    // Optional: restrict only professors
+    if (user.role !== "professor") {
+      return res.status(403).json({
+        success: false,
+        message: "Only professors can upload courses",
+      });
+    }
+
+    // ✅ FILE CHECK
     if (!req.files || !req.files.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
@@ -23,12 +41,17 @@ exports.uploadExcel = async (req, res) => {
 
     console.log("EXCEL:", excelData);
 
-    // ✅ create course object for courseService
+    // ✅ CREATE COURSE WITH SESSION USER (UPDATED)
     const newCourse = await courseService.createCourse({
       courseId: courseName,
       courseName: courseName,
       semester: batch,
       academicYear: "2025-26",
+
+      // 🔥 NEW FIELDS (CRITICAL)
+      professorId: user.id,
+      professorName: user.name,
+
       students: excelData.students,
       stats: excelData.stats,
     });
@@ -40,13 +63,11 @@ exports.uploadExcel = async (req, res) => {
     });
 
   } catch (err) {
-
     console.error("UPLOAD ERROR:", err);
 
     res.status(500).json({
       success: false,
       error: "Upload failed",
     });
-
   }
 };

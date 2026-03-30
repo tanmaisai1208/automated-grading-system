@@ -36,6 +36,7 @@ const sanitizeUser = (user) => {
     email: user.email,
     role: user.role,
     authProvider: user.authProvider,
+    rollNo: user.rollNo || null,
   };
 };
 

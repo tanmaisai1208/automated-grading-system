@@ -3,6 +3,7 @@
     "courseId": "cs 202",
     "courseName": "cs 202",
     "courseCode": "cs 202",
+    "professorId": 1,
     "professorName": "",
     "semester": "27",
     "academicYear": "2025-26",
@@ -84,6 +85,7 @@
     "courseName": "cs 302",
     "courseCode": "cs 302",
     "professorName": "",
+    "professorId": 1,
     "semester": "28",
     "academicYear": "2025-26",
     "uploadedAt": "2026-03-27T11:46:11.262Z",
@@ -146,6 +148,18 @@
         "assignment": 6,
         "totalMarks": 73,
         "automatedGrade": "",
+        "manualGrade": ""
+      },
+      {
+        "sno": 6,
+        "studentName": "Student One",
+        "studentRollNo": "BT22CSE007",
+        "midsem": 22,
+        "endsem": 38,
+        "quiz": 7,
+        "assignment": 6,
+        "totalMarks": 73,
+        "automatedGrade": "CC",
         "manualGrade": ""
       }
     ],

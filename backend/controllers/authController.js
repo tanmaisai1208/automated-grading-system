@@ -13,7 +13,10 @@ const loginUser = async (req, res, next) => {
         message: "Invalid email or password",
       });
     }
-
+    
+    req.session.user = user;
+    console.log("LOGIN USER:", user);
+    console.log("SESSION AFTER SET:", req.session.user);
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -31,6 +34,8 @@ const googleLoginUser = async (req, res, next) => {
 
     const user = await authService.googleLoginUser(name, email);
 
+    req.session.user = user;
+
     res.status(200).json({
       success: true,
       message: "Google login successful",
@@ -44,27 +49,16 @@ const googleLoginUser = async (req, res, next) => {
 /* Current logged-in user fetch */
 const getCurrentUser = async (req, res, next) => {
   try {
-    const { email } = req.query;
-
-    if (!email) {
-      return res.status(400).json({
+    if (!req.session.user) {
+      return res.status(401).json({
         success: false,
-        message: "Email query parameter is required",
-      });
-    }
-
-    const user = await authService.getUserByEmail(email);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
+        message: "Not logged in",
       });
     }
 
     res.status(200).json({
       success: true,
-      user,
+      user: req.session.user,
     });
   } catch (error) {
     next(error);
@@ -74,9 +68,11 @@ const getCurrentUser = async (req, res, next) => {
 /* Logout */
 const logoutUser = async (req, res, next) => {
   try {
-    res.status(200).json({
-      success: true,
-      message: "Logout successful",
+    req.session.destroy(() => {
+      res.status(200).json({
+        success: true,
+        message: "Logout successful",
+      });
     });
   } catch (error) {
     next(error);

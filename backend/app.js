@@ -1,4 +1,5 @@
 const express = require("express");
+const session = require("express-session");
 const cors = require("cors");
 const path = require("path");
 const fileUpload = require("express-fileupload"); 
@@ -11,9 +12,37 @@ const statsRoutes = require("./routes/statsRoutes");
 
 const app = express();
 
-app.use(cors());
+/* ✅ DEFINE CORS OPTIONS ONCE */
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type"],
+};
+
+/* ✅ APPLY CORS FIRST */
+app.use(cors(corsOptions));
+// app.options("/*", cors(corsOptions)); // ✅ FIXED
+
+/* ✅ BODY PARSERS */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+/* ✅ SESSION */
+app.use(
+  session({
+    secret: "grade-system-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  })
+);
+
 app.use(fileUpload()); // ✅ enables file upload
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

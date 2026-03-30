@@ -3,7 +3,9 @@ const courseService = require("../services/courseService");
 /* Get all previous courses */
 const getAllCourses = async (req, res, next) => {
   try {
-    const courses = await courseService.getAllCourses();
+    console.log("SESSION USER:", req.session.user);
+
+    const courses = await courseService.getAllCourses(req.session.user);
 
     res.status(200).json({
       success: true,
