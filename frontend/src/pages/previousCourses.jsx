@@ -92,18 +92,24 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
 import { getAllCourses } from "../services/courseService";
+import { useAuth } from "../auth/AuthContext"; // ✅ IMPORTANT
 import "./previousCourses.css";
 
 const PreviousCourses = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // ✅ get logged-in user
+
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // ✅ wait until user is available
+    if (!user) return;
+
     const fetchCourses = async () => {
       try {
-        const response = await getAllCourses();
-        setCourses(response.courses);
+        const data = await getAllCourses(); // ✅ use service
+        setCourses(data.courses);
       } catch (error) {
         console.error("Error fetching courses:", error);
       } finally {
@@ -112,7 +118,7 @@ const PreviousCourses = () => {
     };
 
     fetchCourses();
-  }, []);
+  }, [user]);
 
   return (
     <div className="previous-wrapper">
@@ -129,34 +135,47 @@ const PreviousCourses = () => {
             </p>
           </div>
 
-          {/* Courses Grid */}
-          <div className="courses-grid">
-            {courses.map((course) => (
-              <div key={course.courseId} className="course-card">
-                <div className="course-header">
-                  <h3>{course.courseName}</h3>
-                  <span className="status completed">
-                    Completed
-                  </span> 
-                </div>
+          {/* ✅ Loading State */}
+          {loading ? (
+            <p>Loading courses...</p>
+          ) : (
+            <div className="courses-grid">
+              {courses.length === 0 ? (
+                <p>No courses found.</p>
+              ) : (
+                courses.map((course) => (
+                  <div key={course.courseId} className="course-card">
+                    <div className="course-header">
+                      <h3>{course.courseName}</h3>
+                      <span className="status completed">
+                        Completed
+                      </span>
+                    </div>
 
-                <p className="batch">
-                    Uploaded: {course.uploadedAt ? new Date(course.uploadedAt).toLocaleDateString() : "N/A"}
-                </p>
+                    <p className="batch">
+                      Uploaded:{" "}
+                      {course.uploadedAt
+                        ? new Date(course.uploadedAt).toLocaleDateString()
+                        : "N/A"}
+                    </p>
 
-                <div className="course-meta">
-                  👨‍🎓 {course.totalStudents} Students
-                </div>
+                    <div className="course-meta">
+                      👨‍🎓 {course.totalStudents} Students
+                    </div>
 
-                <div
-                  className="course-action"
-                  onClick={() => navigate(`/viewdetails/${course.courseId}`)}
-                >
-                  View Details →
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div
+                      className="course-action"
+                      onClick={() =>
+                        navigate(`/viewdetails/${course.courseId}`)
+                      }
+                    >
+                      View Details →
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
 
         </div>
       </main>
