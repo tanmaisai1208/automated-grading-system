@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllCourses } from "../services/courseService";
+import { useAuth } from "../auth/AuthContext";
 import "./Navbar.css";
 
 const Navbar = () => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [courses, setCourses] = useState([]);
@@ -17,7 +19,8 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
 
@@ -94,13 +97,25 @@ const Navbar = () => {
           {/* User */}
           <div className="user-section">
             <div className="user-avatar">
-              <span>P</span>
+              <span>
+                {user?.role
+                  ? user.role.charAt(0).toUpperCase()
+                  : "U"}
+              </span>
             </div>
+
             <div className="user-info-text">
-              <p className="user-name">Professor</p>
+              <p className="user-name">
+                {user?.role === "professor"
+                  ? "Professor"
+                  : user?.role === "student"
+                  ? "Student"
+                  : "User"}
+              </p>
+
               <p className="user-status">
                 <span className="status-dot"></span>
-                Active
+                {user ? "Active" : "Offline"}
               </p>
             </div>
           </div>
