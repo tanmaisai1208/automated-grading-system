@@ -4,6 +4,7 @@ const {
   getGradesByCourse,
   setGradeConfig,
   getGradeConfig,
+  saveManualGrades,
 } = require("../controllers/gradingController");
 
 const router = express.Router();
@@ -22,5 +23,7 @@ router.get("/:courseId", getGradesByCourse);
 
 router.post("/config/:courseId", setGradeConfig);
 router.get("/config/:courseId", getGradeConfig);
+
+router.post("/manual/:courseId", saveManualGrades);
 
 module.exports = router;

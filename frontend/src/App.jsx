@@ -143,7 +143,9 @@ function App() {
           <Route path="/viewdetails/:courseid" element={<CourseDetails />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
           <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
+          <Route path="/manual-grade-adjustment/:courseId" element={<ManualGradeAdjustment />} />
           <Route path="/statistical-analysis" element={<StatisticalAnalysis />} />
+          <Route path="/automated-grade/:courseId" element={<AutomatedGrade />} />
         </Routes>
       </div>
     </Router>

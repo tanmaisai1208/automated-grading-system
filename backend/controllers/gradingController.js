@@ -7,10 +7,17 @@ const computeGrades = async (req, res, next) => {
 
     const result = await gradingService.computeGrades(courseId);
 
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
-      message: "Grades computed and saved to courses.json",
-      students: result,
+      message: "Grades computed successfully",
+      data: result, // contains students + stats
     });
   } catch (error) {
     next(error);
@@ -22,9 +29,9 @@ const getGradesByCourse = async (req, res, next) => {
   try {
     const { courseId } = req.params;
 
-    const grades = await gradingService.getGradesByCourse(courseId);
+    const result = await gradingService.getGradesByCourse(courseId);
 
-    if (!grades) {
+    if (!result) {
       return res.status(404).json({
         success: false,
         message: `No grades found for course ${courseId}`,
@@ -33,9 +40,7 @@ const getGradesByCourse = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      courseId,
-      totalStudents: grades.length,
-      grades,
+      data: result, // 🔥 IMPORTANT: send same structure as compute
     });
   } catch (error) {
     next(error);
@@ -86,9 +91,38 @@ const getGradeConfig = async (req, res, next) => {
   }
 };
 
+/* Save manual grades */
+const saveManualGrades = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const { students } = req.body;
+
+    const result = await gradingService.saveManualGrades(
+      courseId,
+      students
+    );
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Manual grades saved successfully",
+      students: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   computeGrades,
   getGradesByCourse,
   setGradeConfig,
   getGradeConfig,
+  saveManualGrades,
 };

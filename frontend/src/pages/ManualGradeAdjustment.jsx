@@ -1,172 +1,158 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import "./ManualGradeAdjustment.css";
+import "./automatedGrade.css";
 
-const initialGradeRanges = [
-  { grade: "AA", min: 85, max: 100 },
-  { grade: "AB", min: 75, max: 84 },
-  { grade: "BB", min: 65, max: 74 },
-  { grade: "BC", min: 55, max: 64 },
-  { grade: "CC", min: 45, max: 54 },
-  { grade: "CD", min: 35, max: 44 },
-  { grade: "DD", min: 0, max: 34 },
-];
+const gradeOrder = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
 
-const dummyStudents = [
-  {
-    sno: 1,
-    email: "student1@college.edu",
-    roll: "CS21B001",
-    name: "Rahul Sharma",
-    mid: 22,
-    end: 48,
-    quiz: 8,
-    assignment: 7,
-    total: 85,
-    autoGrade: "AA",
-    manualGrade: "AA",
-  },
-  {
-    sno: 2,
-    email: "student2@college.edu",
-    roll: "CS21B002",
-    name: "Ananya Verma",
-    mid: 18,
-    end: 40,
-    quiz: 7,
-    assignment: 6,
-    total: 71,
-    autoGrade: "BB",
-    manualGrade: "BB",
-  },
-];
+export default function ManualGradeAdjustment() {
+  const { courseId } = useParams();
+  const decodedCourseId = decodeURIComponent(courseId);
 
-const ManualGradeAdjustment = () => {
-  const [gradeRanges, setGradeRanges] = useState(initialGradeRanges);
-  const [students, setStudents] = useState(dummyStudents);
+  const [students, setStudents] = useState([]);
 
-  const handleRangeChange = (index, field, value) => {
-    const updated = [...gradeRanges];
-    updated[index][field] = Number(value);
-    setGradeRanges(updated);
-  };
-
-  const recomputeManualGrades = () => {
-    const updatedStudents = students.map((student) => {
-      const gradeObj = gradeRanges.find(
-        (g) => student.total >= g.min && student.total <= g.max
+  /* Fetch students */
+  const fetchStudents = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`
       );
-      return {
-        ...student,
-        manualGrade: gradeObj ? gradeObj.grade : "NA",
-      };
-    });
-    setStudents(updatedStudents);
+
+      const data = await res.json();
+
+      if (data.success && data.data) {
+        const updated = data.data.students.map((s) => ({
+          ...s,
+          manualGrade: s.manualGrade || s.automatedGrade,
+        }));
+
+        setStudents(updated);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  useEffect(() => {
+    fetchStudents();
+  }, [courseId]);
+
+  /* Change grade */
+  const changeGrade = (index, dir) => {
+    const updated = [...students];
+
+    let current = updated[index].manualGrade;
+    let idx = gradeOrder.indexOf(current);
+
+    if (dir === "up" && idx > 0) idx--;
+    if (dir === "down" && idx < gradeOrder.length - 1) idx++;
+
+    updated[index].manualGrade = gradeOrder[idx];
+    setStudents(updated);
+  };
+
+  /* Save manual grades */
+const saveManualGrades = async () => {
+  try {
+    await fetch(
+      `http://localhost:5000/api/grading/manual/${encodeURIComponent(decodedCourseId)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ students }),
+      }
+    );
+
+    alert("Manual grades saved!");
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
-    <div className="manual-grade-wrapper">
+    <div className="auto-grade-wrapper">
       <Navbar />
 
-      <main className="manual-grade-main">
-        <div className="manual-grade-container">
-          <h1 className="page-title">Manual Grade Adjustment</h1>
-          <p className="page-subtitle">
-            Adjust grade cutoffs manually and recompute student grades.
-          </p>
+      <main className="auto-grade-main">
+        <button className="compute-btn floating-btn" onClick={saveManualGrades}>
+          Save Manual Grades
+        </button>
 
-          {/* Grade Range Table */}
-          <section className="card-section">
-            <h2 className="section-title">Grade Cutoff Ranges</h2>
+        <div className="auto-grade-container">
+          <h1 className="page-title">
+            Manual Grade Adjustment — {decodedCourseId}
+          </h1>
 
-            <table className="grade-table">
-              <thead>
-                <tr>
-                  <th>Grade</th>
-                  <th>Min Marks</th>
-                  <th>Max Marks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gradeRanges.map((g, idx) => (
-                  <tr key={g.grade}>
-                    <td>{g.grade}</td>
-                    <td>
-                      <input
-                        type="number"
-                        value={g.min}
-                        onChange={(e) =>
-                          handleRangeChange(idx, "min", e.target.value)
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={g.max}
-                        onChange={(e) =>
-                          handleRangeChange(idx, "max", e.target.value)
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="auto-layout">
+            {/* LEFT — STUDENT TABLE */}
+            <section className="card-section auto-left">
+              <h2 className="section-title">Student Grades</h2>
 
-            <button className="primary-btn" onClick={recomputeManualGrades}>
-              Apply Manual Cutoffs
-            </button>
-          </section>
-
-          {/* Student Table */}
-          <section className="card-section">
-            <h2 className="section-title">Student Marks & Grades</h2>
-
-            <div className="table-scroll">
-              <table className="student-table">
-                <thead>
-                  <tr>
-                    <th>S.No</th>
-                    <th>Email</th>
-                    <th>Roll No</th>
-                    <th>Name</th>
-                    <th>Mid</th>
-                    <th>End</th>
-                    <th>Quiz</th>
-                    <th>Assignment</th>
-                    <th>Total</th>
-                    <th>Grade (Auto)</th>
-                    <th>Grade (Manual)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((s) => (
-                    <tr key={s.sno}>
-                      <td>{s.sno}</td>
-                      <td>{s.email}</td>
-                      <td>{s.roll}</td>
-                      <td>{s.name}</td>
-                      <td>{s.mid}</td>
-                      <td>{s.end}</td>
-                      <td>{s.quiz}</td>
-                      <td>{s.assignment}</td>
-                      <td>{s.total}</td>
-                      <td className="auto-grade">{s.autoGrade}</td>
-                      <td className="manual-grade">{s.manualGrade}</td>
+              <div className="table-scroll">
+                <table className="student-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Roll No</th>
+                      <th>Total</th>
+                      <th>Auto Grade</th>
+                      <th>Manual Grade</th>
+                      <th>Adjust</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {students.map((s, index) => (
+                      <tr key={index}>
+                        <td>{s.studentName}</td>
+                        <td>{s.studentRollNo}</td>
+                        <td>{s.totalMarks}</td>
+                        <td className="auto-grade">
+                          {s.automatedGrade}
+                        </td>
+                        <td className="manual-grade">
+                          {s.manualGrade}
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => changeGrade(index, "up")}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            onClick={() => changeGrade(index, "down")}
+                          >
+                            ↓
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* RIGHT PANEL */}
+            <div className="auto-right">
+              <section className="card-section">
+                <h2 className="section-title">
+                  Manual Grade Instructions
+                </h2>
+
+                <p>
+                  Use ↑ or ↓ to adjust student grades manually.
+                  Manual grades will override automated grades.
+                </p>
+              </section>
             </div>
-          </section>
+          </div>
         </div>
       </main>
 
       <Footer />
     </div>
   );
-};
-
-export default ManualGradeAdjustment;
+}

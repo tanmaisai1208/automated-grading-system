@@ -22,20 +22,32 @@ function calculateMean(arr) {
 /* Standard deviation */
 function calculateStdDev(arr, mean) {
   const variance =
-    arr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-    arr.length;
+    arr.reduce((sum, val) => sum + (val - mean) ** 2, 0) / arr.length;
   return Math.sqrt(variance);
 }
 
-/* Relative grade */
-function getGrade(marks, mean, sd) {
-  if (marks >= mean + 1.5 * sd) return "AA";
-  if (marks >= mean + 0.5 * sd) return "AB";
-  if (marks >= mean) return "BB";
-  if (marks >= mean - 0.5 * sd) return "BC";
-  if (marks >= mean - sd) return "CC";
-  if (marks >= mean - 1.5 * sd) return "CD";
-  if (marks >= mean - 2 * sd) return "DD";
+/* Boundaries (NUMBERS, not strings) */
+function getGradeBoundaries(mean, sd) {
+  return {
+    AA: Math.round(mean + 1.5 * sd),
+    AB: Math.round(mean + 0.5 * sd),
+    BB: Math.round(mean),
+    BC: Math.round(mean - 0.5 * sd),
+    CC: Math.round(mean - sd),
+    CD: Math.round(mean - 1.5 * sd),
+    DD: Math.round(mean - 2 * sd),
+  };
+}
+
+/* Grade assignment */
+function getGrade(marks, boundaries) {
+  if (marks >= boundaries.AA) return "AA";
+  if (marks >= boundaries.AB) return "AB";
+  if (marks >= boundaries.BB) return "BB";
+  if (marks >= boundaries.BC) return "BC";
+  if (marks >= boundaries.CC) return "CC";
+  if (marks >= boundaries.CD) return "CD";
+  if (marks >= boundaries.DD) return "DD";
   return "F";
 }
 
@@ -49,22 +61,36 @@ const computeGrades = async (courseId) => {
 
   if (!course) return null;
 
-  const marksArray = course.students.map((s) => s.totalMarks);
+  const students = course.students || [];
+
+  const marksArray = students.map((s) => s.totalMarks || 0);
+
   const mean = calculateMean(marksArray);
   const sd = calculateStdDev(marksArray, mean);
 
-  course.students.forEach((student) => {
-    const grade = getGrade(student.totalMarks, mean, sd);
-    student.automatedGrade = grade;
-  });
+  const boundaries = getGradeBoundaries(mean, sd);
 
-  // save stats also
-  course.stats.mean = mean;
-  course.stats.standardDeviation = sd;
+  // assign grades
+  course.students = students.map((student) => ({
+    ...student,
+    automatedGrade: getGrade(student.totalMarks || 0, boundaries),
+  }));
 
+  // ✅ ensure stats exists
+  if (!course.stats) course.stats = {};
+
+  // ✅ consistent naming
+  course.stats.mean = Number(mean.toFixed(2));
+  course.stats.sd = Number(sd.toFixed(2));
+  course.stats.boundaries = boundaries;
+
+  // write to file
   writeCourses(courses);
 
-  return course.students;
+  return {
+    students: course.students,
+    stats: course.stats,
+  };
 };
 
 /* Get grades */
@@ -77,10 +103,42 @@ const getGradesByCourse = async (courseId) => {
 
   if (!course) return null;
 
+  return {
+    students: course.students || [],
+    stats: course.stats || {},
+  };
+};
+
+/* Save manual grades into courses.json */
+const saveManualGrades = async (courseId, students) => {
+  const courses = readCourses();
+
+  const course = courses.find(
+    (c) => c.courseId.toLowerCase() === courseId.toLowerCase()
+  );
+
+  if (!course) return null;
+
+  // Map rollNo → manualGrade
+  const gradeMap = {};
+  students.forEach((s) => {
+    gradeMap[s.studentRollNo] = s.manualGrade;
+  });
+
+  // Update JSON
+  course.students.forEach((student) => {
+    if (gradeMap[student.studentRollNo]) {
+      student.manualGrade = gradeMap[student.studentRollNo];
+    }
+  });
+
+  writeCourses(courses);
+
   return course.students;
 };
 
 module.exports = {
   computeGrades,
   getGradesByCourse,
+  saveManualGrades,
 };

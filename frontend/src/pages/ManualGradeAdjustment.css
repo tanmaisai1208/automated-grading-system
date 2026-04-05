@@ -130,3 +130,24 @@
   font-weight: 700;
   color: #16a34a;
 }
+
+.floating-save-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.floating-save-btn:hover {
+  background-color: #15803d;
+}

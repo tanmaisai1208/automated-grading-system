@@ -109,6 +109,27 @@
   color: #2563eb;
 }
 
+.floating-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 26px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.floating-btn:hover {
+  background-color: #1e40af;
+}
+
 /* RESPONSIVE */
 @media (max-width: 1000px) {
   .auto-layout {

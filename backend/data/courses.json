@@ -19,6 +19,96 @@
         "assignment": 9,
         "totalMarks": 87,
         "automatedGrade": "AB",
+        "manualGrade": "AB"
+      },
+      {
+        "sno": 2,
+        "studentName": "Priya",
+        "studentRollNo": "BT22CSE002",
+        "midsem": 20,
+        "endsem": 40,
+        "quiz": 7,
+        "assignment": 8,
+        "totalMarks": 75,
+        "automatedGrade": "BC",
+        "manualGrade": "BC"
+      },
+      {
+        "sno": 3,
+        "studentName": "Amit",
+        "studentRollNo": "BT22CSE003",
+        "midsem": 18,
+        "endsem": 35,
+        "quiz": 6,
+        "assignment": 7,
+        "totalMarks": 66,
+        "automatedGrade": "CD",
+        "manualGrade": "CD"
+      },
+      {
+        "sno": 4,
+        "studentName": "Sneha",
+        "studentRollNo": "BT22CSE004",
+        "midsem": 30,
+        "endsem": 48,
+        "quiz": 9,
+        "assignment": 10,
+        "totalMarks": 97,
+        "automatedGrade": "AA",
+        "manualGrade": "AA"
+      },
+      {
+        "sno": 5,
+        "studentName": "Kiran",
+        "studentRollNo": "BT22CSE005",
+        "midsem": 22,
+        "endsem": 38,
+        "quiz": 7,
+        "assignment": 6,
+        "totalMarks": 73,
+        "automatedGrade": "CC",
+        "manualGrade": "CC"
+      }
+    ],
+    "stats": {
+      "average": 79.6,
+      "min": 66,
+      "max": 97,
+      "mean": 79.6,
+      "sd": 11.02,
+      "boundaries": {
+        "AA": 96,
+        "AB": 85,
+        "BB": 80,
+        "BC": 74,
+        "CC": 69,
+        "CD": 63,
+        "DD": 58
+      }
+    },
+    "autoCutoffs": {},
+    "manualCutoffs": {}
+  },
+  {
+    "courseId": "cs 302",
+    "courseName": "OS",
+    "courseCode": "cs 302",
+    "professorName": "",
+    "professorId": 1,
+    "semester": "28",
+    "academicYear": "2025-26",
+    "uploadedAt": "2026-03-27T11:46:11.262Z",
+    "students": [
+      {
+        "sno": 1,
+        "studentName": "Rahul",
+        "studentRollNo": "BT22CSE001",
+        "midsem": 24,
+        "endsem": 46,
+        "quiz": 8,
+        "assignment": 9,
+        "totalMarks": 87,
+        "automatedGrade": "AB",
         "manualGrade": ""
       },
       {
@@ -66,88 +156,7 @@
         "quiz": 7,
         "assignment": 6,
         "totalMarks": 73,
-        "automatedGrade": "CC",
-        "manualGrade": ""
-      }
-    ],
-    "stats": {
-      "average": 79.6,
-      "min": 66,
-      "max": 97,
-      "mean": 79.6,
-      "standardDeviation": 11.01998185116473
-    },
-    "autoCutoffs": {},
-    "manualCutoffs": {}
-  },
-  {
-    "courseId": "cs 302",
-    "courseName": "OS",
-    "courseCode": "cs 302",
-    "professorName": "",
-    "professorId": 1,
-    "semester": "28",
-    "academicYear": "2025-26",
-    "uploadedAt": "2026-03-27T11:46:11.262Z",
-    "students": [
-      {
-        "sno": 1,
-        "studentName": "Rahul",
-        "studentRollNo": "BT22CSE001",
-        "midsem": 24,
-        "endsem": 46,
-        "quiz": 8,
-        "assignment": 9,
-        "totalMarks": 87,
-        "automatedGrade": "",
-        "manualGrade": ""
-      },
-      {
-        "sno": 2,
-        "studentName": "Priya",
-        "studentRollNo": "BT22CSE002",
-        "midsem": 20,
-        "endsem": 40,
-        "quiz": 7,
-        "assignment": 8,
-        "totalMarks": 75,
-        "automatedGrade": "",
-        "manualGrade": ""
-      },
-      {
-        "sno": 3,
-        "studentName": "Amit",
-        "studentRollNo": "BT22CSE003",
-        "midsem": 18,
-        "endsem": 35,
-        "quiz": 6,
-        "assignment": 7,
-        "totalMarks": 66,
-        "automatedGrade": "",
-        "manualGrade": ""
-      },
-      {
-        "sno": 4,
-        "studentName": "Sneha",
-        "studentRollNo": "BT22CSE004",
-        "midsem": 30,
-        "endsem": 48,
-        "quiz": 9,
-        "assignment": 10,
-        "totalMarks": 97,
-        "automatedGrade": "",
-        "manualGrade": ""
-      },
-      {
-        "sno": 5,
-        "studentName": "Kiran",
-        "studentRollNo": "BT22CSE005",
-        "midsem": 22,
-        "endsem": 38,
-        "quiz": 7,
-        "assignment": 6,
-        "totalMarks": 73,
-        "automatedGrade": "",
+        "automatedGrade": "BC",
         "manualGrade": ""
       },
       {
@@ -159,14 +168,25 @@
         "quiz": 7,
         "assignment": 6,
         "totalMarks": 73,
-        "automatedGrade": "CC",
+        "automatedGrade": "BC",
         "manualGrade": ""
       }
     ],
     "stats": {
       "average": 79.6,
       "min": 66,
-      "max": 97
+      "max": 97,
+      "mean": 78.5,
+      "sd": 10.36,
+      "boundaries": {
+        "AA": 94,
+        "AB": 84,
+        "BB": 79,
+        "BC": 73,
+        "CC": 68,
+        "CD": 63,
+        "DD": 58
+      }
     },
     "autoCutoffs": {},
     "manualCutoffs": {}
