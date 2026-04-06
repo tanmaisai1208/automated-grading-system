@@ -109,7 +109,7 @@
         "assignment": 9,
         "totalMarks": 87,
         "automatedGrade": "AB",
-        "manualGrade": ""
+        "manualGrade": "BB"
       },
       {
         "sno": 2,
@@ -121,7 +121,7 @@
         "assignment": 8,
         "totalMarks": 75,
         "automatedGrade": "BC",
-        "manualGrade": ""
+        "manualGrade": "BC"
       },
       {
         "sno": 3,
@@ -133,7 +133,7 @@
         "assignment": 7,
         "totalMarks": 66,
         "automatedGrade": "CD",
-        "manualGrade": ""
+        "manualGrade": "CD"
       },
       {
         "sno": 4,
@@ -145,7 +145,7 @@
         "assignment": 10,
         "totalMarks": 97,
         "automatedGrade": "AA",
-        "manualGrade": ""
+        "manualGrade": "AA"
       },
       {
         "sno": 5,
@@ -157,7 +157,7 @@
         "assignment": 6,
         "totalMarks": 73,
         "automatedGrade": "BC",
-        "manualGrade": ""
+        "manualGrade": "BC"
       },
       {
         "sno": 6,
@@ -169,7 +169,7 @@
         "assignment": 6,
         "totalMarks": 73,
         "automatedGrade": "BC",
-        "manualGrade": ""
+        "manualGrade": "BC"
       }
     ],
     "stats": {
