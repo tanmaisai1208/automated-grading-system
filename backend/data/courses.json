@@ -68,6 +68,18 @@
         "totalMarks": 73,
         "automatedGrade": "CC",
         "manualGrade": "CC"
+      },
+      {
+        "sno": 6,
+        "studentName": "Student One",
+        "studentRollNo": "BT22CSE007",
+        "midsem": 22,
+        "endsem": 38,
+        "quiz": 7,
+        "assignment": 6,
+        "totalMarks": 73,
+        "automatedGrade": "BC",
+        "manualGrade": ""
       }
     ],
     "stats": {
