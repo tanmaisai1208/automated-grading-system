@@ -1,22 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./ConfirmWeightages.css";
 
 const ConfirmWeightages = () => {
-  // This will later come from backend / Excel parsing
   const navigate = useNavigate();
-  const initialComponents = [
-    { name: "Mid Semester Exam", weightage: 30 },
-    { name: "End Semester Exam", weightage: 40 },
-    { name: "Assignment 1", weightage: "" },
-    { name: "Assignment 2", weightage: "" },
-    { name: "Quiz 1", weightage: 10 },
-    { name: "Quiz 2", weightage: "" },
-  ];
+  const location = useLocation();
 
-  const [components, setComponents] = useState(initialComponents);
+  const [courseData, setCourseData] = useState(null);
+  const [components, setComponents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // data structure from uploadMarks: { success, message, course }
+    const res = location.state;
+
+    if (!res || !res.course) {
+      alert("No course data found. Please upload marks first.");
+      navigate("/upload-marks");
+      return;
+    }
+
+    const course = res.course;
+    setCourseData(course);
+
+    // Filter out system columns from the first student to find marking components
+    if (course.students && course.students.length > 0) {
+      const student = course.students[0];
+      const systemFields = ["sno", "studentName", "studentRollNo", "totalMarks", "automatedGrade", "manualGrade"];
+
+      const markingFields = Object.keys(student).filter(
+        (key) => !systemFields.includes(key)
+      );
+
+      // Create component list with initial weightages if any
+      const initialWeightages = course.weightages || {};
+      const componentList = markingFields.map((field) => ({
+        id: field,
+        name: field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1'), // Simple pretty print
+        weightage: initialWeightages[field] || "",
+      }));
+
+      setComponents(componentList);
+    }
+
+    setLoading(false);
+  }, [location, navigate]);
 
   const handleChange = (index, value) => {
     const updated = [...components];
@@ -29,13 +59,44 @@ const ConfirmWeightages = () => {
     0
   );
 
-  const handleSubmit = () => {
-    console.log("Confirmed Weightages:", components);
+  const handleSubmit = async () => {
+    if (totalWeightage !== 100) {
+      alert("Total weightage must be 100%");
+      return;
+    }
 
-    alert("Weightages confirmed successfully!");
+    try {
+      // Map components back to key:value for backend
+      const weightageObj = {};
+      components.forEach((c) => {
+        weightageObj[c.id] = Number(c.weightage);
+      });
 
-    navigate("/automated-grade");
+      const res = await fetch(`http://localhost:5000/api/grading/config/${courseData.courseId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ weightages: weightageObj }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to save weightages");
+      }
+
+      alert("Weightages confirmed successfully!");
+      // Navigate to automated grade page for this specific course
+      navigate(`/automated-grade/${courseData.courseId}`);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Operation failed");
+    }
   };
+
+  if (loading) return <div className="confirm-wrapper"><Navbar /><main className="confirm-main">Loading...</main><Footer /></div>;
 
   return (
     <div className="confirm-wrapper">
@@ -46,7 +107,7 @@ const ConfirmWeightages = () => {
           <header className="confirm-header">
             <h1>Confirm Course Weightages</h1>
             <p>
-              Review the extracted weightages from the uploaded Excel sheet.
+              Review the extracted weightages for <strong>{courseData?.courseId}</strong>.
               You may modify or add missing values before proceeding.
             </p>
           </header>
@@ -60,32 +121,39 @@ const ConfirmWeightages = () => {
                 </tr>
               </thead>
               <tbody>
-                {components.map((comp, index) => (
-                  <tr key={index}>
-                    <td className="component-name">{comp.name}</td>
-                    <td>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        placeholder="Enter %"
-                        value={comp.weightage}
-                        onChange={(e) =>
-                          handleChange(index, e.target.value)
-                        }
-                      />
+                {components.length > 0 ? (
+                  components.map((comp, index) => (
+                    <tr key={index}>
+                      <td className="component-name">{comp.name}</td>
+                      <td>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          placeholder="Enter %"
+                          value={comp.weightage}
+                          onChange={(e) =>
+                            handleChange(index, e.target.value)
+                          }
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="2" style={{ textAlign: "center", padding: "2rem" }}>
+                      No marking components found in this sheet.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
 
             <div className="weightage-summary">
               <span>Total Weightage</span>
               <span
-                className={`total-value ${
-                  totalWeightage === 100 ? "valid" : "invalid"
-                }`}
+                className={`total-value ${totalWeightage === 100 ? "valid" : "invalid"
+                  }`}
               >
                 {totalWeightage}%
               </span>
@@ -94,7 +162,7 @@ const ConfirmWeightages = () => {
             <div className="confirm-actions">
               <button
                 className="confirm-btn"
-                disabled={totalWeightage !== 100}
+                disabled={totalWeightage !== 100 || components.length === 0}
                 onClick={handleSubmit}
               >
                 Confirm & Proceed
@@ -110,3 +178,4 @@ const ConfirmWeightages = () => {
 };
 
 export default ConfirmWeightages;
+
