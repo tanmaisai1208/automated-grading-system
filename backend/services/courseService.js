@@ -331,7 +331,7 @@ const createCourse = async (courseData) => {
     courseName: courseData.courseName,
     courseCode: courseData.courseCode || courseData.courseId,
 
-    professorId: courseData.professorId, // ✅ NEW
+    professorId: courseData.professorId,
     professorName: courseData.professorName || "",
 
     semester: courseData.semester || "",
@@ -340,9 +340,11 @@ const createCourse = async (courseData) => {
 
     students: courseData.students || [],
     stats: courseData.stats || {},
+    weightages: courseData.weightages || {}, // ✅ Store initial weightages
     autoCutoffs: {},
     manualCutoffs: {},
   };
+
 
   courses.push(newCourse);
   await fs.writeFile(dataFilePath, JSON.stringify(courses, null, 2));

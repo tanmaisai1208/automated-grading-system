@@ -5,25 +5,7 @@ exports.uploadExcel = async (req, res) => {
   try {
     console.log("BODY:", req.body);
 
-    const { courseName, batch, coordinators } = req.body;
-
-    // ✅ CHECK LOGIN (NEW)
-    const user = req.session.user;
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized: Please login first",
-      });
-    }
-
-    // Optional: restrict only professors
-    if (user.role !== "professor") {
-      return res.status(403).json({
-        success: false,
-        message: "Only professors can upload courses",
-      });
-    }
+    const { courseId, professorName, academicYear } = req.body;
 
     // ✅ FILE CHECK
     if (!req.files || !req.files.file) {
@@ -36,25 +18,22 @@ exports.uploadExcel = async (req, res) => {
 
     await file.mv(filePath);
 
-    // ✅ read excel
-    const excelData = processExcel(filePath);
+    // ✅ read excel — all columns become student attributes dynamically
+    const { students, initialWeightages } = await processExcel(filePath);
 
-    console.log("EXCEL:", excelData);
+    console.log("EXCEL:", students);
 
-    // ✅ CREATE COURSE WITH SESSION USER (UPDATED)
+    // ✅ CREATE COURSE with manually entered fields → saves into courses.json
     const newCourse = await courseService.createCourse({
-      courseId: courseName,
-      courseName: courseName,
-      semester: batch,
-      academicYear: "2025-26",
-
-      // 🔥 NEW FIELDS (CRITICAL)
-      professorId: user.id,
-      professorName: user.name,
-
-      students: excelData.students,
-      stats: excelData.stats,
+      courseId,
+      courseName: courseId,
+      professorId: req.session.user ? req.session.user.id : null, // Fix: capture professorId from session
+      professorName,
+      academicYear,
+      students: students,
+      weightages: initialWeightages, // ✅ Save extracted weightages
     });
+
 
     res.json({
       success: true,

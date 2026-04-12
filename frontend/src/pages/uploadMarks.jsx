@@ -6,30 +6,37 @@ import "./uploadMarks.css";
 
 const UploadMarks = () => {
   const navigate = useNavigate();
-  const [courseName, setCourseName] = useState("");
-  const [batch, setBatch] = useState("");
-  const [coordinators, setCoordinators] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [professorName, setProfessorName] = useState("");
+  const [academicYear, setAcademicYear] = useState("");
   const [file, setFile] = useState(null);
 
   const handleUpload = async () => {
-    if (!courseName || !batch || !file) {
+    if (!courseId || !professorName || !academicYear || !file) {
       alert("Please fill all required fields and select an Excel file");
       return;
     }
 
     const formData = new FormData();
-    formData.append("courseName", courseName);
-    formData.append("batch", batch);
-    formData.append("coordinators", coordinators);
+    formData.append("courseId", courseId);
+    formData.append("professorName", professorName);
+    formData.append("academicYear", academicYear);
     formData.append("file", file);
 
     try {
       const res = await fetch("http://localhost:5000/api/upload", {
         method: "POST",
+        credentials: "include",
         body: formData,
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || data.error || "Upload failed");
+        return;
+      }
+
       console.log(data);
 
       navigate("/confirm-weightages", { state: data });
@@ -64,32 +71,32 @@ const UploadMarks = () => {
               <h2 className="section-title">Course Details</h2>
 
               <div className="form-group">
-                <label>Course Name</label>
+                <label>Course ID</label>
                 <input
                   type="text"
-                  placeholder="e.g. CS 202 - Data Structures"
-                  value={courseName}
-                  onChange={(e) => setCourseName(e.target.value)}
+                  placeholder="e.g. CS202"
+                  value={courseId}
+                  onChange={(e) => setCourseId(e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label>Batch</label>
+                <label>Professor Name</label>
                 <input
                   type="text"
-                  placeholder="e.g. Batch of 27"
-                  value={batch}
-                  onChange={(e) => setBatch(e.target.value)}
+                  placeholder="e.g. Dr. Sharma"
+                  value={professorName}
+                  onChange={(e) => setProfessorName(e.target.value)}
                 />
               </div>
 
-              {/* OPTIONAL FIELD */}
-              <div className="form-group optional">
-                <label>Course Co-ordinators (optional)</label>
+              <div className="form-group">
+                <label>Academic Year</label>
                 <input
                   type="text"
-                  value={coordinators}
-                  onChange={(e) => setCoordinators(e.target.value)}
+                  placeholder="e.g. 2025-26"
+                  value={academicYear}
+                  onChange={(e) => setAcademicYear(e.target.value)}
                 />
               </div>
             </div>

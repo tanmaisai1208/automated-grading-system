@@ -137,8 +137,72 @@ const saveManualGrades = async (courseId, students) => {
   return course.students;
 };
 
+/* Set grading config (weightages/cutoffs) */
+const setGradeConfig = async (courseId, config) => {
+  const courses = readCourses();
+
+  const index = courses.findIndex(
+    (c) => c.courseId.toLowerCase() === courseId.toLowerCase()
+  );
+
+  if (index === -1) return null;
+
+  // Update course with new config values
+  if (config.weightages) {
+    courses[index].weightages = config.weightages;
+
+    // 🔥 Recalculate totalMarks for all students based on weightage columns
+    const assessmentKeys = Object.keys(config.weightages);
+
+    if (courses[index].students) {
+      courses[index].students = courses[index].students.map((student) => {
+        let total = 0;
+        assessmentKeys.forEach((key) => {
+          total += Number(student[key] || 0);
+        });
+
+        return {
+          ...student,
+          totalMarks: Number(total.toFixed(2)), // Store calculated total
+        };
+      });
+    }
+  }
+
+  if (config.autoCutoffs) {
+    courses[index].autoCutoffs = config.autoCutoffs;
+  }
+  if (config.manualCutoffs) {
+    courses[index].manualCutoffs = config.manualCutoffs;
+  }
+
+  writeCourses(courses);
+
+  return courses[index];
+};
+
+
+/* Get grading config */
+const getGradeConfig = async (courseId) => {
+  const courses = readCourses();
+
+  const course = courses.find(
+    (c) => c.courseId.toLowerCase() === courseId.toLowerCase()
+  );
+
+  if (!course) return null;
+
+  return {
+    weightages: course.weightages || {},
+    autoCutoffs: course.autoCutoffs || {},
+    manualCutoffs: course.manualCutoffs || {},
+  };
+};
+
 module.exports = {
   computeGrades,
   getGradesByCourse,
   saveManualGrades,
+  setGradeConfig,
+  getGradeConfig,
 };
