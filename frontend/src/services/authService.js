@@ -49,12 +49,24 @@ export const logoutUser = async () => {
 };
 
 /* GET CURRENT USER */
-export const getCurrentUser = async (email) => {
+// export const getCurrentUser = async (email) => {
+//   const response = await fetch(
+//     `${BASE_URL}/me?email=${encodeURIComponent(email)}`,
+//     {
+//       method: "GET",
+//       credentials: "include", // 🔥 IMPORTANT for session-based auth
+//     }
+//   );
+
+//   return handleResponse(response);
+// };
+
+export const getCurrentUser = async () => {
   const response = await fetch(
-    `${BASE_URL}/me?email=${encodeURIComponent(email)}`,
+    `${BASE_URL}/me`,
     {
       method: "GET",
-      credentials: "include", // 🔥 IMPORTANT for session-based auth
+      credentials: "include",
     }
   );
 

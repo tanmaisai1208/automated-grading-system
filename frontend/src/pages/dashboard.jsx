@@ -4,11 +4,13 @@ import HelpModal from "../components/HelpModal";
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import { getAllCourses } from "../services/courseService";
+import { getCurrentUser } from "../services/authService";
 import { getStats } from "../services/statsService";
 import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showHelp, setShowHelp] = useState(false);
   const [courses, setCourses] = useState([]);
@@ -16,6 +18,22 @@ const Dashboard = () => {
   const [totalCourses, setTotalCourses] = useState(0);
   const [avgMarks, setAvgMarks] = useState(0);
   const [avgGrade, setAvgGrade] = useState("--");
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getCurrentUser();
+        if (data.success) {
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -262,11 +280,11 @@ useEffect(() => {
           {/* Navigation Section */}
           <section className="navigation-section">
             <h2 className="section-title">
-              <span className="title-icon">📊</span>
+              <span className="title-icon">⚡</span>
               <span className="title-text">Quick Access</span>
             </h2>
 
-            <div className="navigation-cards">
+            <div className={`navigation-cards ${user?.role === "student" ? "single-card" : ""}`}>
               {/* Card 1 */}
               <div className="nav-card nav-card-primary" onClick={() => handleNavigate('/previous-courses')}>
                 <div className="card-shine"></div>
@@ -329,63 +347,65 @@ useEffect(() => {
               </div>
 
               {/* Card 2 */}
-              <div className="nav-card nav-card-secondary" onClick={() => handleNavigate('/upload-marks')}>
-                <div className="card-shine"></div>
-                <div className="card-corner corner-tl"></div>
-                <div className="card-corner corner-tr"></div>
-                <div className="card-corner corner-bl"></div>
-                <div className="card-corner corner-br"></div>
-                
-                <div className="card-header">
-                  <div className="card-icon-wrapper">
-                    <div className="card-icon secondary">
-                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                        <path d="M40 30V36C40 36.5304 39.7893 37.0391 39.4142 37.4142C39.0391 37.7893 38.5304 38 38 38H10C9.46957 38 8.96086 37.7893 8.58579 37.4142C8.21071 37.0391 8 36.5304 8 36V30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M32 16L24 8L16 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M24 8V30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              {user?.role === "professor" && (
+                <div className="nav-card nav-card-secondary" onClick={() => handleNavigate('/upload-marks')}>
+                  <div className="card-shine"></div>
+                  <div className="card-corner corner-tl"></div>
+                  <div className="card-corner corner-tr"></div>
+                  <div className="card-corner corner-bl"></div>
+                  <div className="card-corner corner-br"></div>
+                  
+                  <div className="card-header">
+                    <div className="card-icon-wrapper">
+                      <div className="card-icon secondary">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                          <path d="M40 30V36C40 36.5304 39.7893 37.0391 39.4142 37.4142C39.0391 37.7893 38.5304 38 38 38H10C9.46957 38 8.96086 37.7893 8.58579 37.4142C8.21071 37.0391 8 36.5304 8 36V30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M32 16L24 8L16 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M24 8V30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="card-badge badge-secondary">New</div>
+                  </div>
+
+                  <div className="card-body">
+                    <h3 className="card-title">Upload New Course</h3>
+                    <p className="card-description">
+                      Begin grading process by uploading student marks for a new course and 
+                      generate automated grade distributions with intelligent analytics.
+                    </p>
+
+                    <div className="card-features">
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Excel Upload</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Auto Grading</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Statistical Analysis</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card-footer">
+                    <button className="card-action-btn">
+                      <span>Upload Marks</span>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                    </div>
-                  </div>
-                  <div className="card-badge badge-secondary">New</div>
-                </div>
-
-                <div className="card-body">
-                  <h3 className="card-title">Upload New Course</h3>
-                  <p className="card-description">
-                    Begin grading process by uploading student marks for a new course and 
-                    generate automated grade distributions with intelligent analytics.
-                  </p>
-
-                  <div className="card-features">
-                    <div className="feature-item">
-                      <span className="feature-icon">✓</span>
-                      <span>Excel Upload</span>
-                    </div>
-                    <div className="feature-item">
-                      <span className="feature-icon">✓</span>
-                      <span>Auto Grading</span>
-                    </div>
-                    <div className="feature-item">
-                      <span className="feature-icon">✓</span>
-                      <span>Statistical Analysis</span>
+                    </button>
+                    <div className="card-meta">
+                      <span>Quick Process</span>
+                      <span className="meta-separator">•</span>
+                      <span>Instant Results</span>
                     </div>
                   </div>
                 </div>
-
-                <div className="card-footer">
-                  <button className="card-action-btn">
-                    <span>Upload Marks</span>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                  <div className="card-meta">
-                    <span>Quick Process</span>
-                    <span className="meta-separator">•</span>
-                    <span>Instant Results</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </section>
 
