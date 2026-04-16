@@ -93,6 +93,7 @@ function normalPdf(x, mu, sigma) {
 }
 
 const StatisticalAnalysis = () => {
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const { courseId } = useParams();
 
  
@@ -102,7 +103,7 @@ useEffect(() => {
   const fetchStats = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/courses/${courseId}`
+        `${BASE_URL}/api/courses/${courseId}`
       );
 
       const data = await res.json();

@@ -7,6 +7,7 @@ import "./automatedGrade.css";
 const gradeOrder = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
 
 export default function ManualGradeAdjustment() {
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const { courseId } = useParams();
   const decodedCourseId = decodeURIComponent(courseId);
 
@@ -16,7 +17,7 @@ export default function ManualGradeAdjustment() {
   const fetchStudents = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`
+        `${BASE_URL}/api/grading/${encodeURIComponent(decodedCourseId)}`
       );
 
       const data = await res.json();
@@ -56,7 +57,7 @@ export default function ManualGradeAdjustment() {
 const saveManualGrades = async () => {
   try {
     await fetch(
-      `http://localhost:5000/api/grading/manual/${encodeURIComponent(decodedCourseId)}`,
+      `${BASE_URL}/api/grading/manual/${encodeURIComponent(decodedCourseId)}`,
       {
         method: "POST",
         headers: {

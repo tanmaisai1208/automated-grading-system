@@ -10,7 +10,8 @@ const UploadMarks = () => {
   const [professorName, setProfessorName] = useState("");
   const [academicYear, setAcademicYear] = useState("");
   const [file, setFile] = useState(null);
-
+  const BASE_URL = import.meta.env.VITE_API_URL;
+  
   const handleUpload = async () => {
     if (!courseId || !professorName || !academicYear || !file) {
       alert("Please fill all required fields and select an Excel file");
@@ -24,7 +25,7 @@ const UploadMarks = () => {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:5000/api/upload", {
+      const res = await fetch("${BASE_URL}/api/upload", {
         method: "POST",
         credentials: "include",
         body: formData,

@@ -4,44 +4,56 @@
 // const dataFilePath = path.join(__dirname, "../data/courses.json");
 // const usersFilePath = path.join(__dirname, "../data/users.json");
 
-// /* Read all courses from JSON file */
+// /* Read JSON helpers */
 // const readCoursesFromFile = async () => {
 //   try {
 //     const data = await fs.readFile(dataFilePath, "utf-8");
-
-//     if (!data.trim()) {
-//       return [];
-//     }
-
+//     if (!data.trim()) return [];
 //     return JSON.parse(data);
 //   } catch (error) {
-//     if (error.code === "ENOENT") {
-//       return [];
-//     }
+//     if (error.code === "ENOENT") return [];
 //     throw error;
 //   }
 // };
 
-// /* Write all courses back to JSON file */
-// const writeCoursesToFile = async (courses) => {
-//   await fs.writeFile(dataFilePath, JSON.stringify(courses, null, 2), "utf-8");
+// const readUsersFromFile = async () => {
+//   const data = await fs.readFile(usersFilePath, "utf-8");
+//   return JSON.parse(data);
 // };
 
-// /* Normalize courseId matching */
+// /* Normalize */
 // const normalizeCourseId = (courseId) => {
 //   return String(courseId).trim().toLowerCase();
 // };
 
-// /* Get all courses */
-// const getAllCourses = async () => {
+// /* 🔥 UPDATED: Get courses based on user */
+// const getAllCourses = async (user) => {
 //   const courses = await readCoursesFromFile();
 
-//   /*
-//     Return lighter data useful for:
-//     - previousCourses cards
-//     - dashboard cards/history
-//   */
-//   return courses.map((course) => ({
+//   console.log("USER IN SERVICE:", user);
+
+//   if (!user) {
+//     return []; // no session → no courses
+//   }
+
+//   let filteredCourses = [];
+
+//   if (user.role === "professor") {
+//     filteredCourses = courses.filter(
+//       (course) => course.professorId === user.id
+//     );
+//   } else if (user.role === "student") {
+//     filteredCourses = courses.filter((course) =>
+//       course.students.some(
+//         (student) =>
+//           student.studentRollNo &&
+//           user.rollNo &&
+//           student.studentRollNo.toLowerCase() === user.rollNo.toLowerCase()
+//       )
+//     );
+//   }
+
+//   return filteredCourses.map((course) => ({
 //     courseId: course.courseId,
 //     courseName: course.courseName,
 //     courseCode: course.courseCode || course.courseId,
@@ -49,7 +61,9 @@
 //     semester: course.semester || "",
 //     academicYear: course.academicYear || "",
 //     uploadedAt: course.uploadedAt || "",
-//     totalStudents: Array.isArray(course.students) ? course.students.length : 0,
+//     totalStudents: Array.isArray(course.students)
+//       ? course.students.length
+//       : 0,
 //     stats: course.stats || {},
 //   }));
 // };
@@ -66,16 +80,17 @@
 //   );
 // };
 
-// /* Get summary for one course card/details header */
+// /* Keep rest SAME */
+
 // const getCourseSummary = async (courseId) => {
 //   const course = await getCourseById(courseId);
-
 //   if (!course) return null;
 
 //   return {
 //     courseId: course.courseId,
 //     courseName: course.courseName,
 //     courseCode: course.courseCode || course.courseId,
+//     professorId: course.professorId || "",
 //     professorName: course.professorName || "",
 //     semester: course.semester || "",
 //     academicYear: course.academicYear || "",
@@ -87,78 +102,43 @@
 //   };
 // };
 
-// /* Get processed students table for CourseDetails page */
 // const getCourseStudentsTable = async (courseId) => {
 //   const course = await getCourseById(courseId);
-
 //   if (!course) return null;
-
 //   return Array.isArray(course.students) ? course.students : [];
 // };
 
-// /* Create new course */
+// /* 🔥 UPDATED createCourse */
 // const createCourse = async (courseData) => {
 //   const courses = await readCoursesFromFile();
-
-//   if (!courseData.courseId || !courseData.courseName) {
-//     const error = new Error("courseId and courseName are required");
-//     error.status = 400;
-//     throw error;
-//   }
-
-//   const alreadyExists = courses.find(
-//     (course) =>
-//       normalizeCourseId(course.courseId) ===
-//       normalizeCourseId(courseData.courseId)
-//   );
-
-//   if (alreadyExists) {
-//     const error = new Error("Course with this courseId already exists");
-//     error.status = 400;
-//     throw error;
-//   }
 
 //   const newCourse = {
 //     courseId: courseData.courseId,
 //     courseName: courseData.courseName,
 //     courseCode: courseData.courseCode || courseData.courseId,
+
+//     professorId: courseData.professorId,
 //     professorName: courseData.professorName || "",
+
 //     semester: courseData.semester || "",
 //     academicYear: courseData.academicYear || "",
-//     uploadedAt: courseData.uploadedAt || new Date().toISOString(),
+//     uploadedAt: new Date().toISOString(),
 
-//     /*
-//       students array is expected to hold processed rows like:
-//       [
-//         {
-//           sno,
-//           studentName,
-//           studentEmail,
-//           studentRollNo,
-//           midsem,
-//           endsem,
-//           quiz,
-//           assignment,
-//           totalMarks,
-//           automatedGrade,
-//           manualGrade
-//         }
-//       ]
-//     */
-//     students: Array.isArray(courseData.students) ? courseData.students : [],
-
+//     students: courseData.students || [],
 //     stats: courseData.stats || {},
-//     autoCutoffs: courseData.autoCutoffs || {},
-//     manualCutoffs: courseData.manualCutoffs || {},
+//     weightages: courseData.weightages || {}, // ✅ Store initial weightages
+//     autoCutoffs: {},
+//     manualCutoffs: {},
 //   };
 
+
 //   courses.push(newCourse);
-//   await writeCoursesToFile(courses);
+//   await fs.writeFile(dataFilePath, JSON.stringify(courses, null, 2));
 
 //   return newCourse;
 // };
 
-// /* Update course */
+// /* unchanged */
 // const updateCourse = async (courseId, updates) => {
 //   const courses = await readCoursesFromFile();
 
@@ -167,25 +147,20 @@
 //       normalizeCourseId(course.courseId) === normalizeCourseId(courseId)
 //   );
 
-//   if (index === -1) {
-//     return null;
-//   }
-
-//   const existingCourse = courses[index];
+//   if (index === -1) return null;
 
 //   const updatedCourse = {
-//     ...existingCourse,
+//     ...courses[index],
 //     ...updates,
-//     courseId: existingCourse.courseId, // prevent changing primary identity
+//     courseId: courses[index].courseId,
 //   };
 
 //   courses[index] = updatedCourse;
-//   await writeCoursesToFile(courses);
+//   await fs.writeFile(dataFilePath, JSON.stringify(courses, null, 2));
 
 //   return updatedCourse;
 // };
 
-// /* Delete course */
 // const deleteCourse = async (courseId) => {
 //   const courses = await readCoursesFromFile();
 
@@ -194,11 +169,9 @@
 //       normalizeCourseId(course.courseId) !== normalizeCourseId(courseId)
 //   );
 
-//   if (filteredCourses.length === courses.length) {
-//     return false;
-//   }
+//   if (filteredCourses.length === courses.length) return false;
 
-//   await writeCoursesToFile(filteredCourses);
+//   await fs.writeFile(dataFilePath, JSON.stringify(filteredCourses, null, 2));
 //   return true;
 // };
 
@@ -214,6 +187,9 @@
 
 const fs = require("fs").promises;
 const path = require("path");
+
+// 🔥 IMPORT GITHUB SERVICE
+const { updateCoursesFile } = require("./githubService");
 
 const dataFilePath = path.join(__dirname, "../data/courses.json");
 const usersFilePath = path.join(__dirname, "../data/users.json");
@@ -235,20 +211,30 @@ const readUsersFromFile = async () => {
   return JSON.parse(data);
 };
 
+/* 🔥 NEW: Centralized write function */
+const writeCoursesToFile = async (courses) => {
+  // 1. Write locally
+  await fs.writeFile(dataFilePath, JSON.stringify(courses, null, 2));
+
+  // 2. Push to GitHub (persistence)
+  try {
+    await updateCoursesFile(courses);
+    console.log("✅ Synced courses.json to GitHub");
+  } catch (err) {
+    console.error("❌ GitHub sync failed:", err.message);
+  }
+};
+
 /* Normalize */
 const normalizeCourseId = (courseId) => {
   return String(courseId).trim().toLowerCase();
 };
 
-/* 🔥 UPDATED: Get courses based on user */
+/* 🔥 Get courses based on user */
 const getAllCourses = async (user) => {
   const courses = await readCoursesFromFile();
 
-  console.log("USER IN SERVICE:", user);
-
-  if (!user) {
-    return []; // no session → no courses
-  }
+  if (!user) return [];
 
   let filteredCourses = [];
 
@@ -282,7 +268,7 @@ const getAllCourses = async (user) => {
   }));
 };
 
-/* Get full course by courseId */
+/* Get full course */
 const getCourseById = async (courseId) => {
   const courses = await readCoursesFromFile();
 
@@ -294,8 +280,7 @@ const getCourseById = async (courseId) => {
   );
 };
 
-/* Keep rest SAME */
-
+/* Summary */
 const getCourseSummary = async (courseId) => {
   const course = await getCourseById(courseId);
   if (!course) return null;
@@ -309,20 +294,23 @@ const getCourseSummary = async (courseId) => {
     semester: course.semester || "",
     academicYear: course.academicYear || "",
     uploadedAt: course.uploadedAt || "",
-    totalStudents: Array.isArray(course.students) ? course.students.length : 0,
+    totalStudents: Array.isArray(course.students)
+      ? course.students.length
+      : 0,
     stats: course.stats || {},
     autoCutoffs: course.autoCutoffs || {},
     manualCutoffs: course.manualCutoffs || {},
   };
 };
 
+/* Students Table */
 const getCourseStudentsTable = async (courseId) => {
   const course = await getCourseById(courseId);
   if (!course) return null;
   return Array.isArray(course.students) ? course.students : [];
 };
 
-/* 🔥 UPDATED createCourse */
+/* 🔥 CREATE COURSE (UPDATED) */
 const createCourse = async (courseData) => {
   const courses = await readCoursesFromFile();
 
@@ -340,19 +328,20 @@ const createCourse = async (courseData) => {
 
     students: courseData.students || [],
     stats: courseData.stats || {},
-    weightages: courseData.weightages || {}, // ✅ Store initial weightages
+    weightages: courseData.weightages || {},
     autoCutoffs: {},
     manualCutoffs: {},
   };
 
-
   courses.push(newCourse);
-  await fs.writeFile(dataFilePath, JSON.stringify(courses, null, 2));
+
+  // 🔥 USE CENTRALIZED WRITE
+  await writeCoursesToFile(courses);
 
   return newCourse;
 };
 
-/* unchanged */
+/* 🔥 UPDATE COURSE (UPDATED) */
 const updateCourse = async (courseId, updates) => {
   const courses = await readCoursesFromFile();
 
@@ -370,11 +359,14 @@ const updateCourse = async (courseId, updates) => {
   };
 
   courses[index] = updatedCourse;
-  await fs.writeFile(dataFilePath, JSON.stringify(courses, null, 2));
+
+  // 🔥 USE CENTRALIZED WRITE
+  await writeCoursesToFile(courses);
 
   return updatedCourse;
 };
 
+/* 🔥 DELETE COURSE (UPDATED) */
 const deleteCourse = async (courseId) => {
   const courses = await readCoursesFromFile();
 
@@ -385,7 +377,9 @@ const deleteCourse = async (courseId) => {
 
   if (filteredCourses.length === courses.length) return false;
 
-  await fs.writeFile(dataFilePath, JSON.stringify(filteredCourses, null, 2));
+  // 🔥 USE CENTRALIZED WRITE
+  await writeCoursesToFile(filteredCourses);
+
   return true;
 };
 

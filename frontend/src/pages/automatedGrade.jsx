@@ -5,6 +5,7 @@ import Footer from "../components/footer";
 import "./automatedGrade.css";
 
 export default function AutomatedGrade() {
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const { courseId } = useParams();
   const decodedCourseId = decodeURIComponent(courseId);
 
@@ -21,7 +22,7 @@ export default function AutomatedGrade() {
   const fetchGrades = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`,
+        `${BASE_URL}/api/grading/${encodeURIComponent(decodedCourseId)}`,
         { credentials: "include" },
       );
 
@@ -43,7 +44,7 @@ export default function AutomatedGrade() {
   const computeGrades = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/grading/compute/${encodeURIComponent(decodedCourseId)}`,
+        `${BASE_URL}/api/grading/compute/${encodeURIComponent(decodedCourseId)}`,
         {
           method: "POST",
           credentials: "include",
