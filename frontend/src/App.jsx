@@ -306,7 +306,6 @@ import PreviousCourses from "./pages/previousCourses";
 import CourseDetails from "./pages/CourseDetails";
 import ConfirmWeightages from "./pages/ConfirmWeightages";
 import AutomatedGrade from "./pages/automatedGrade";
-import ManualGradeAdjustment from "./pages/ManualGradeAdjustment";
 import StatisticalAnalysis from './pages/StatisticalAnalysis';
 import './App.css';
 
@@ -330,9 +329,8 @@ function App() {
           <Route path="/upload-marks" element={<UploadMarks />} />
           <Route path="/viewdetails/:courseid" element={<CourseDetails />} />
           <Route path="/automated-grade" element={<AutomatedGrade />} />
-          <Route path="/manual-grade-adjustment" element={<ManualGradeAdjustment />} />
-          <Route path="/manual-grade-adjustment/:courseId" element={<ManualGradeAdjustment />} />
           <Route path="/statistical-analysis" element={<StatisticalAnalysis />} />
+          <Route path="/statistical-analysis/:courseId" element={<StatisticalAnalysis />} />
           <Route path="/automated-grade/:courseId" element={<AutomatedGrade />} />
         </Routes>
       </div>

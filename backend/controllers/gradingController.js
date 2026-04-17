@@ -53,15 +53,17 @@ const setGradeConfig = async (req, res, next) => {
     const { courseId } = req.params;
     const config = req.body;
 
-    const savedConfig = await gradingService.setGradeConfig(
-      courseId,
-      config
-    );
+    const result = await gradingService.setGradeConfig(courseId, config);
+
+    // Validation error returned as object with error key
+    if (result?.error) {
+      return res.status(400).json({ success: false, message: result.error });
+    }
 
     res.status(200).json({
       success: true,
       message: "Grade config saved successfully",
-      config: savedConfig,
+      config: result.course,
     });
   } catch (error) {
     next(error);

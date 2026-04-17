@@ -11,14 +11,12 @@ export default function AutomatedGrade() {
   const navigate = useNavigate();
   const decodedCourseId = decodeURIComponent(courseId);
 
-  const [students, setStudents] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // "weightage" | "boundary" | null
-  const [editMode, setEditMode] = useState(null);
-
+  const [students, setStudents]     = useState([]);
+  const [stats, setStats]           = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [editMode, setEditMode]     = useState(null);
   const [weightages, setWeightages] = useState({});
+  const [maxMarks, setMaxMarks]     = useState({});
   const [boundaries, setBoundaries] = useState({});
 
   /* ── helpers ── */
@@ -32,7 +30,7 @@ export default function AutomatedGrade() {
     return map;
   };
 
-  /* ── fetch config ── */
+  /* ── load config (weightages + maxMarks) ── */
   const fetchConfig = async () => {
     try {
       const res = await fetch(
@@ -41,16 +39,18 @@ export default function AutomatedGrade() {
       );
       const data = await res.json();
       if (data.success && data.config) {
-        if (data.config.weightages && Object.keys(data.config.weightages).length > 0)
+        if (Object.keys(data.config.weightages || {}).length > 0)
           setWeightages(data.config.weightages);
+        if (Object.keys(data.config.totalMarks || {}).length > 0)
+          setMaxMarks(data.config.totalMarks);
       }
     } catch (err) {
       console.error("Config fetch error:", err);
     }
   };
 
-  /* ── compute grades ── */
-  const computeGrades = async () => {
+  /* ── initial compute — only if gradesComputed is false ── */
+  const initialCompute = async () => {
     setLoading(true);
     try {
       const res = await fetch(
@@ -59,11 +59,7 @@ export default function AutomatedGrade() {
       );
       const data = await res.json();
       if (data.success && data.data) {
-        const updated = (data.data.students || []).map((s) => ({
-          ...s,
-          manualGrade: s.manualGrade || s.automatedGrade,
-        }));
-        setStudents(updated);
+        setStudents(data.data.students || []);
         setStats(data.data.stats || null);
         if (data.data.stats?.boundaries)
           setBoundaries({ ...data.data.stats.boundaries });
@@ -75,51 +71,89 @@ export default function AutomatedGrade() {
     }
   };
 
-  useEffect(() => {
-    if (courseId) {
-      fetchConfig().then(() => computeGrades());
+  /* ── fetch existing grades (when gradesComputed already true) ── */
+  const fetchGrades = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`,
+        { credentials: "include" }
+      );
+      const data = await res.json();
+      if (data.success && data.data) {
+        setStudents(data.data.students || []);
+        setStats(data.data.stats || null);
+        if (data.data.stats?.boundaries)
+          setBoundaries({ ...data.data.stats.boundaries });
+      }
+    } catch (err) {
+      console.error("Fetch grades error:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  /* ── on mount: check flag then decide ── */
+  useEffect(() => {
+    if (!courseId) return;
+
+    const init = async () => {
+      await fetchConfig();
+
+      // Check gradesComputed flag
+      const res = await fetch(
+        `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`,
+        { credentials: "include" }
+      );
+      const data = await res.json();
+
+      if (data.success && data.data?.gradesComputed === true) {
+        // Already computed — just load, never call compute again
+        setStudents(data.data.students || []);
+        setStats(data.data.stats || null);
+        if (data.data.stats?.boundaries)
+          setBoundaries({ ...data.data.stats.boundaries });
+        setLoading(false);
+      } else {
+        // First time — compute and lock
+        await initialCompute();
+      }
+    };
+
+    init();
   }, [courseId]);
 
   /* ── inline manual grade adjust ── */
   const changeGrade = (index, dir) => {
     const updated = [...students];
     let idx = gradeOrder.indexOf(updated[index].manualGrade);
-    if (dir === "up" && idx > 0) idx--;
+    if (dir === "up"   && idx > 0)                   idx--;
     if (dir === "down" && idx < gradeOrder.length - 1) idx++;
     updated[index].manualGrade = gradeOrder[idx];
     setStudents(updated);
   };
 
-  /* ── apply weightage changes → recompute ── */
-  const applyWeightageEdit = async () => {
-  try {
-    const configRes = await fetch(
-      `http://localhost:5000/api/grading/config/${encodeURIComponent(decodedCourseId)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ weightages }),
-      }
-    );
+  /* ── boundary change with cascade validation ── */
+  const handleBoundaryChange = (grade, value) => {
+    const num     = Number(value);
+    const updated = { ...boundaries, [grade]: num };
+    const order   = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
+    const idx     = order.indexOf(grade);
 
-    const configData = await configRes.json();
-    if (!configData.success) {
-      alert("Failed to save weightages: " + (configData.message || "unknown error"));
-      return;
+    for (let i = idx - 1; i >= 0; i--) {
+      if (updated[order[i]] < updated[order[i + 1]])
+        updated[order[i]] = updated[order[i + 1]];
+      else break;
     }
+    for (let i = idx + 1; i < order.length; i++) {
+      if (updated[order[i]] > updated[order[i - 1]])
+        updated[order[i]] = updated[order[i - 1]];
+      else break;
+    }
+    setBoundaries(updated);
+  };
 
-    // Now recompute — service will re-sum totalMarks from components
-    await computeGrades();
-    setEditMode(null);
-  } catch (err) {
-    console.error("Weightage apply error:", err);
-    alert("Failed to apply weightage changes.");
-  }
-};
-
-  /* ── apply boundary changes → reassign grades client-side ── */
+  /* ── apply boundary edit → manualGrade only ── */
   const applyBoundaryEdit = () => {
     const updated = students.map((s) => {
       let grade = "F";
@@ -129,14 +163,49 @@ export default function AutomatedGrade() {
           break;
         }
       }
-      return { ...s, automatedGrade: grade, manualGrade: grade };
+      return { ...s, manualGrade: grade }; // automatedGrade untouched
     });
     setStudents(updated);
     setStats((prev) => ({ ...prev, boundaries: { ...boundaries } }));
     setEditMode(null);
   };
 
-  /* ── save & redirect ── */
+  /* ── apply weightage edit → backend recomputes everything ── */
+  const applyWeightageEdit = async () => {
+    const weightTotal = Object.values(weightages).reduce(
+      (a, b) => a + Number(b), 0
+    );
+    if (Math.round(weightTotal) !== 100) {
+      alert(`Weightages must sum to 100. Current sum: ${weightTotal.toFixed(1)}`);
+      return;
+    }
+
+    try {
+      const configRes = await fetch(
+        `http://localhost:5000/api/grading/config/${encodeURIComponent(decodedCourseId)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ weightages }),
+        }
+      );
+      const configData = await configRes.json();
+      if (!configData.success) {
+        alert(configData.message || "Failed to save config");
+        return;
+      }
+
+      // Fetch updated data — backend has new totalMarks, mean, sd, boundaries, manualGrades
+      await fetchGrades();
+      setEditMode(null);
+    } catch (err) {
+      console.error("Weightage apply error:", err);
+      alert("Failed to apply weightage changes.");
+    }
+  };
+
+  /* ── save manual grades and redirect ── */
   const saveChanges = async () => {
     try {
       await fetch(
@@ -148,7 +217,7 @@ export default function AutomatedGrade() {
           body: JSON.stringify({ students }),
         }
       );
-      navigate(`/viewdetails/${encodeURIComponent(decodedCourseId)}`);
+      navigate(`/statistical-analysis/${encodeURIComponent(decodedCourseId)}`);
     } catch (err) {
       console.error("Save error:", err);
       alert("Failed to save grades.");
@@ -162,11 +231,8 @@ export default function AutomatedGrade() {
       <Navbar />
 
       <main className="auto-grade-main">
-        {/* ── floating actions ── */}
         <div className="floating-actions">
-          <button className="compute-btn floating-btn" onClick={computeGrades}>
-            Recompute
-          </button>
+          {/* No Recompute button — only Save */}
           <button className="compute-btn floating-btn save-btn" onClick={saveChanges}>
             Save Changes
           </button>
@@ -179,10 +245,9 @@ export default function AutomatedGrade() {
             <p className="loading-text">Computing grades...</p>
           ) : (
             <>
-              {/* ══ TOP LAYOUT: grade summary + edit panel ══ */}
               <div className="auto-layout">
 
-                {/* LEFT — Grade Distribution Table */}
+                {/* LEFT — Grade Distribution */}
                 <section className="card-section auto-left">
                   <h2 className="section-title">Grade Distribution</h2>
                   <div className="table-scroll">
@@ -210,99 +275,7 @@ export default function AutomatedGrade() {
                 {/* RIGHT — Edit Panel */}
                 <div className="auto-right">
 
-                  {/* Mode selector */}
-                  <section className="card-section">
-                    <h2 className="section-title">Edit Mode</h2>
-                    <p className="edit-mode-note">
-                      Only one can be active at a time. Switching will discard
-                      unsaved changes in the other.
-                    </p>
-                    <div className="mode-btn-row">
-                      <button
-                        className={`mode-btn ${editMode === "weightage" ? "active" : ""}`}
-                        onClick={() =>
-                          setEditMode(editMode === "weightage" ? null : "weightage")
-                        }
-                      >
-                        Edit Weightages
-                      </button>
-                      <button
-                        className={`mode-btn ${editMode === "boundary" ? "active" : ""}`}
-                        onClick={() =>
-                          setEditMode(editMode === "boundary" ? null : "boundary")
-                        }
-                      >
-                        Edit Boundaries
-                      </button>
-                    </div>
-                  </section>
-
-                  {/* Weightage editor */}
-                  {editMode === "weightage" && (
-                    <section className="card-section">
-                      <h2 className="section-title">Weightages</h2>
-                      <p className="edit-mode-note">
-                        Changing weightages will recompute total marks and grades.
-                      </p>
-                      <table className="grade-table">
-                        <tbody>
-                          {Object.entries(weightages).map(([k, v]) => (
-                            <tr key={k}>
-                              <td>{k}</td>
-                              <td>
-                                <input
-                                  type="number"
-                                  value={v}
-                                  min={0}
-                                  onChange={(e) =>
-                                    setWeightages({ ...weightages, [k]: Number(e.target.value) })
-                                  }
-                                />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      <button className="apply-btn" onClick={applyWeightageEdit}>
-                        Apply &amp; Recompute
-                      </button>
-                    </section>
-                  )}
-
-                  {/* Boundary editor */}
-                  {editMode === "boundary" && (
-                    <section className="card-section">
-                      <h2 className="section-title">Grade Boundaries</h2>
-                      <p className="edit-mode-note">
-                        Set minimum marks for each grade. Grades will be
-                        reassigned immediately on apply.
-                      </p>
-                      <table className="grade-table">
-                        <tbody>
-                          {gradeOrder.map((g) => (
-                            <tr key={g}>
-                              <td>{g}</td>
-                              <td>
-                                <input
-                                  type="number"
-                                  value={boundaries[g] ?? ""}
-                                  min={0}
-                                  onChange={(e) =>
-                                    setBoundaries({ ...boundaries, [g]: Number(e.target.value) })
-                                  }
-                                />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      <button className="apply-btn" onClick={applyBoundaryEdit}>
-                        Apply Boundaries
-                      </button>
-                    </section>
-                  )}
-
-                  {/* Stats strip */}
+                  {/* Stats */}
                   {stats && (
                     <section className="card-section">
                       <h2 className="section-title">Stats</h2>
@@ -314,10 +287,122 @@ export default function AutomatedGrade() {
                       </table>
                     </section>
                   )}
+
+                  {/* Mode selector */}
+                  <section className="card-section">
+                    <h2 className="section-title">Edit Mode</h2>
+                    <p className="edit-mode-note">
+                      Only one active at a time. All changes write to manual grade only.
+                    </p>
+                    <div className="mode-btn-row">
+                      <button
+                        className={`mode-btn ${editMode === "weightage" ? "active" : ""}`}
+                        onClick={() => setEditMode(editMode === "weightage" ? null : "weightage")}
+                      >
+                        Edit Weightages
+                      </button>
+                      <button
+                        className={`mode-btn ${editMode === "boundary" ? "active" : ""}`}
+                        onClick={() => setEditMode(editMode === "boundary" ? null : "boundary")}
+                      >
+                        Edit Boundaries
+                      </button>
+                    </div>
+                  </section>
+
+                  {/* Weightage editor */}
+                  {editMode === "weightage" && (
+                    <section className="card-section">
+                      <h2 className="section-title">Weightages</h2>
+                      <p className="edit-mode-note">
+                        Formula: (scored / max) × weight. Must sum to 100%.
+                        Recomputes total marks, mean, SD, boundaries and manual grades.
+                      </p>
+                      <table className="grade-table">
+                        <thead>
+                          <tr>
+                            <th>Component</th>
+                            <th>Max</th>
+                            <th>Weight (%)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(weightages).map(([k, v]) => (
+                            <tr key={k}>
+                              <td>{k}</td>
+                              <td style={{ color: "var(--color-text-secondary)", fontSize: "0.85rem" }}>
+                                {maxMarks[k] ?? "—"}
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  value={v}
+                                  min={0}
+                                  max={100}
+                                  onChange={(e) =>
+                                    setWeightages({ ...weightages, [k]: Number(e.target.value) })
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <p className="edit-mode-note" style={{ marginTop: "0.5rem" }}>
+                        Total:{" "}
+                        <strong style={{
+                          color: Math.round(Object.values(weightages).reduce((a, b) => a + Number(b), 0)) === 100
+                            ? "var(--color-text-success)"
+                            : "var(--color-text-danger)"
+                        }}>
+                          {Object.values(weightages).reduce((a, b) => a + Number(b), 0)}%
+                        </strong>
+                      </p>
+                      <button className="apply-btn" onClick={applyWeightageEdit}>
+                        Apply &amp; Recompute
+                      </button>
+                    </section>
+                  )}
+
+                  {/* Boundary editor */}
+                  {editMode === "boundary" && (
+                    <section className="card-section">
+                      <h2 className="section-title">Grade Boundaries</h2>
+                      <p className="edit-mode-note">
+                        Minimum marks per grade. Auto-adjusts to stay descending.
+                        Writes to manual grade only.
+                      </p>
+                      <table className="grade-table">
+                        <tbody>
+                          {gradeOrder.map((g, i) => (
+                            <tr key={g}>
+                              <td>{g}</td>
+                              <td>
+                                <input
+                                  type="number"
+                                  value={boundaries[g] ?? ""}
+                                  min={0}
+                                  onChange={(e) => handleBoundaryChange(g, e.target.value)}
+                                />
+                              </td>
+                              {i > 0 && boundaries[g] === boundaries[gradeOrder[i - 1]] && (
+                                <td style={{ fontSize: "0.75rem", color: "var(--color-text-warning)" }}>
+                                  = {gradeOrder[i - 1]}
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <button className="apply-btn" onClick={applyBoundaryEdit}>
+                        Apply Boundaries
+                      </button>
+                    </section>
+                  )}
                 </div>
               </div>
 
-              {/* ══ BOTTOM — Student Detail Table ══ */}
+              {/* BOTTOM — Student table */}
               <section className="card-section" style={{ marginTop: "1.5rem" }}>
                 <h2 className="section-title">Student Grades</h2>
                 <div className="table-scroll">
@@ -329,7 +414,6 @@ export default function AutomatedGrade() {
                         <th>Total Marks</th>
                         <th>Auto Grade</th>
                         <th>Manual Grade</th>
-                        <th>Adjust</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -340,13 +424,7 @@ export default function AutomatedGrade() {
                             <td>{s.studentRollNo}</td>
                             <td>{s.totalMarks}</td>
                             <td className="auto-grade">{s.automatedGrade || "-"}</td>
-                            <td className="manual-grade">
-                              {s.manualGrade || s.automatedGrade || "-"}
-                            </td>
-                            <td className="adjust-btns">
-                              <button onClick={() => changeGrade(index, "up")}>↑</button>
-                              <button onClick={() => changeGrade(index, "down")}>↓</button>
-                            </td>
+                            <td className="manual-grade">{s.manualGrade || "-"}</td>
                           </tr>
                         ))
                       ) : (

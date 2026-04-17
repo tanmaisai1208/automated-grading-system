@@ -328,7 +328,7 @@ const componentBar = {
           <header className="analysis-header">
             <div className="analysis-badge">📈 Statistical Insights</div>
             <h1 className="analysis-title">
-              Performance Analytics <span className="analysis-course">{courseid}</span>
+              Performance Analytics <span className="analysis-course">{courseId}</span>
             </h1>
             <p className="analysis-subtitle">
               Visual and statistical overview of class performance (no individual student table shown here).
