@@ -9,21 +9,15 @@ const {
 
 const router = express.Router();
 
-/*
-  Base path in app.js:
-  app.use("/api/grading", gradingRoutes);
-*/
+router.get("/test", (req, res) => res.send("Grading route working"));
 
-router.get("/test", (req, res) => {
-  res.send("Grading route working");
-});
-
+// ── specific routes FIRST ──
 router.post("/compute/:courseId", computeGrades);
-router.get("/:courseId", getGradesByCourse);
-
-router.post("/config/:courseId", setGradeConfig);
-router.get("/config/:courseId", getGradeConfig);
-
 router.post("/manual/:courseId", saveManualGrades);
+router.post("/config/:courseId", setGradeConfig);
+router.get("/config/:courseId", getGradeConfig);   // must be before /:courseId
+
+// ── wildcard LAST ──
+router.get("/:courseId", getGradesByCourse);
 
 module.exports = router;
