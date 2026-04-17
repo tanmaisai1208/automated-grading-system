@@ -19,7 +19,7 @@ exports.uploadExcel = async (req, res) => {
     await file.mv(filePath);
 
     // ✅ read excel — all columns become student attributes dynamically
-    const { students, initialWeightages } = await processExcel(filePath);
+    const { students, initialWeightages, initialTotalMarks } = await processExcel(filePath);
 
     console.log("EXCEL:", students);
 
@@ -31,7 +31,8 @@ exports.uploadExcel = async (req, res) => {
       professorName,
       academicYear,
       students: students,
-      weightages: initialWeightages, // ✅ Save extracted weightages
+      weightages: initialWeightages,   // ✅ Save extracted weightages
+      totalMarks: initialTotalMarks,   // ✅ Save extracted total marks per assessment
     });
 
 

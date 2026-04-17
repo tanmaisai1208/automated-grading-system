@@ -15,13 +15,13 @@ const processExcel = async (filePath) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const jsonData = xlsx.utils.sheet_to_json(sheet);
 
-  if (!jsonData.length) return { students: [], initialWeightages: {} };
+  if (!jsonData.length) return { students: [], initialWeightages: {}, initialTotalMarks: {} };
 
   // Extract column headers from the first row
   const columnHeaders = Object.keys(jsonData[0]);
 
   // Use LLM (or fallback) to get { mappings: { "Org": "Std" }, weightages: { "Std": val } }
-  const { mappings, weightages: initialWeightages } = await mapColumns(columnHeaders);
+  const { mappings, weightages: initialWeightages, totalMarks: initialTotalMarks } = await mapColumns(columnHeaders);
 
   // Build student objects using the mapped keys
   const students = jsonData.map((row, index) => {
@@ -44,7 +44,7 @@ const processExcel = async (filePath) => {
     return student;
   });
 
-  return { students, initialWeightages };
+  return { students, initialWeightages, initialTotalMarks };
 
 };
 

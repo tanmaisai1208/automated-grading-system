@@ -34,12 +34,14 @@ const ConfirmWeightages = () => {
         (key) => !systemFields.includes(key)
       );
 
-      // Create component list with initial weightages if any
+      // Create component list with initial weightages and totalMarks if any
       const initialWeightages = course.weightages || {};
+      const initialTotalMarks = course.totalMarks || {};
       const componentList = markingFields.map((field) => ({
         id: field,
         name: field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1'), // Simple pretty print
         weightage: initialWeightages[field] || "",
+        totalMarks: initialTotalMarks[field] || "",
       }));
 
       setComponents(componentList);
@@ -48,9 +50,9 @@ const ConfirmWeightages = () => {
     setLoading(false);
   }, [location, navigate]);
 
-  const handleChange = (index, value) => {
+  const handleChange = (index, field, value) => {
     const updated = [...components];
-    updated[index].weightage = value;
+    updated[index][field] = value;
     setComponents(updated);
   };
 
@@ -68,8 +70,10 @@ const ConfirmWeightages = () => {
     try {
       // Map components back to key:value for backend
       const weightageObj = {};
+      const totalMarksObj = {};
       components.forEach((c) => {
         weightageObj[c.id] = Number(c.weightage);
+        if (c.totalMarks !== "") totalMarksObj[c.id] = Number(c.totalMarks);
       });
 
       const res = await fetch(`http://localhost:5000/api/grading/config/${courseData.courseId}`, {
@@ -78,7 +82,7 @@ const ConfirmWeightages = () => {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ weightages: weightageObj }),
+        body: JSON.stringify({ weightages: weightageObj, totalMarks: totalMarksObj }),
       });
 
       const data = await res.json();
@@ -118,6 +122,7 @@ const ConfirmWeightages = () => {
                 <tr>
                   <th>Component</th>
                   <th>Weightage (%)</th>
+                  <th>Total Marks</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,7 +138,18 @@ const ConfirmWeightages = () => {
                           placeholder="Enter %"
                           value={comp.weightage}
                           onChange={(e) =>
-                            handleChange(index, e.target.value)
+                            handleChange(index, "weightage", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="e.g. 50"
+                          value={comp.totalMarks}
+                          onChange={(e) =>
+                            handleChange(index, "totalMarks", e.target.value)
                           }
                         />
                       </td>

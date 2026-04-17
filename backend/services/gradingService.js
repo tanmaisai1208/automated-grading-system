@@ -147,6 +147,11 @@ const setGradeConfig = async (courseId, config) => {
     }
   }
 
+  // ✅ Also persist total marks per assessment if provided
+  if (config.totalMarks) {
+    courses[index].totalMarks = config.totalMarks;
+  }
+
   if (config.autoCutoffs)  courses[index].autoCutoffs  = config.autoCutoffs;
   if (config.manualCutoffs) courses[index].manualCutoffs = config.manualCutoffs;
 
@@ -163,6 +168,7 @@ const getGradeConfig = async (courseId) => {
   if (!course) return null;
   return {
     weightages:    course.weightages    || {},
+    totalMarks:    course.totalMarks    || {},
     autoCutoffs:   course.autoCutoffs   || {},
     manualCutoffs: course.manualCutoffs || {},
   };

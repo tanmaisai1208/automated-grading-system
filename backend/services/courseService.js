@@ -340,7 +340,8 @@ const createCourse = async (courseData) => {
 
     students: courseData.students || [],
     stats: courseData.stats || {},
-    weightages: courseData.weightages || {}, // ✅ Store initial weightages
+    weightages: courseData.weightages || {},   // ✅ Store initial weightages
+    totalMarks: courseData.totalMarks || {},   // ✅ Store total marks per assessment
     autoCutoffs: {},
     manualCutoffs: {},
   };

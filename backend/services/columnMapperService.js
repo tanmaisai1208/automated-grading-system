@@ -18,7 +18,7 @@ async function mapColumns(columnHeaders) {
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `
-You are mapping Excel column headers from a student marksheet to standardized field names and extracting potential weightages.
+You are mapping Excel column headers from a student marksheet to standardized field names and extracting potential weightages and total marks.
 
 Column headers from the sheet: ${JSON.stringify(columnHeaders)}
 
@@ -48,12 +48,18 @@ Rules for Weightage Extraction:
 - Extract the number only (e.g., 30).
 - If no weightage is found for a column, do not include it in the weightages object.
 
-Return ONLY a valid JSON object with two keys: "mappings" (the field maps) and "weightages" (the extracted numbers mapped to standardized field names), no explanation, no markdown.
+Rules for Total Marks Extraction:
+- Look for phrases like "out of N", "/N", "(N marks)", "[N marks]", "max N", "max: N" in the header.
+- Extract the number N only (e.g., "Quiz /10" → 10, "Midsem (out of 50)" → 50).
+- If no total marks info is found for a column, do not include it in the totalMarks object.
+
+Return ONLY a valid JSON object with three keys: "mappings" (the field maps), "weightages" (extracted weightage percentages mapped to standardized field names), and "totalMarks" (extracted total/max marks mapped to standardized field names). No explanation, no markdown.
 
 Example output:
 {
-  "mappings": {"Name": "studentName", "Mid Sem (30%)": "midsem", "End Sem (50%)": "endsem"},
-  "weightages": {"midsem": 30, "endsem": 50}
+  "mappings": {"Name": "studentName", "Mid Sem (30%) /50": "midsem", "Quiz /10": "quiz"},
+  "weightages": {"midsem": 30},
+  "totalMarks": {"midsem": 50, "quiz": 10}
 }
 `.trim();
 
@@ -68,9 +74,11 @@ Example output:
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON found in LLM response");
 
-    const result = JSON.parse(jsonMatch[0]);
-    console.log("[columnMapper] LLM result:", result);
-    return result;
+    const parsed = JSON.parse(jsonMatch[0]);
+    // Ensure totalMarks key always exists
+    if (!parsed.totalMarks) parsed.totalMarks = {};
+    console.log("[columnMapper] LLM result:", parsed);
+    return parsed;
 
   } catch (err) {
     console.error("[columnMapper] LLM failed, using rule-based fallback:", err.message);
@@ -86,6 +94,7 @@ function ruleBasedMap(headers) {
   const counters = {};
   const mapping = {};
   const weightages = {};
+  const totalMarks = {};
 
   headers.forEach((header) => {
     const h = header.toLowerCase().replace(/[\s_\-]+/g, "");
@@ -95,6 +104,22 @@ function ruleBasedMap(headers) {
     let extractedWeight = null;
     if (weightMatch) {
       extractedWeight = parseInt(weightMatch[1], 10);
+    }
+
+    // Try to extract total marks: e.g. "/10", "out of 10", "(10 marks)", "[10 marks]", "max 10", "max: 10"
+    const totalMatch =
+      header.match(/\/\s*(\d+)/) ||
+      header.match(/out\s+of\s+(\d+)/i) ||
+      header.match(/\(?\[?(\d+)\s*marks?\]?\)?/i) ||
+      header.match(/max:?\s*(\d+)/i);
+    let extractedTotal = null;
+    if (totalMatch) {
+      // Make sure this number isn't already captured as a weightage percentage
+      const candidate = parseInt(totalMatch[1], 10);
+      // Avoid double-counting if same number was already the weightage
+      if (extractedWeight === null || candidate !== extractedWeight) {
+        extractedTotal = candidate;
+      }
     }
 
     let mappedKey = "";
@@ -139,9 +164,12 @@ function ruleBasedMap(headers) {
     if (extractedWeight !== null) {
       weightages[mappedKey] = extractedWeight;
     }
+    if (extractedTotal !== null) {
+      totalMarks[mappedKey] = extractedTotal;
+    }
   });
 
-  const result = { mappings: mapping, weightages };
+  const result = { mappings: mapping, weightages, totalMarks };
   console.log("[columnMapper] Rule-based mapping:", result);
   return result;
 }
