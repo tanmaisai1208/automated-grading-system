@@ -232,7 +232,7 @@
   font-size: 2rem;
   font-weight: 700;
   color: #0f172a;
-  margin: 0 0 2rem 0;
+  margin: 2rem 0 2rem 0;
   letter-spacing: -0.02em;
   position: relative;
   display: inline-block;
@@ -678,4 +678,16 @@
   .card-features {
     font-size: 0.875rem;
   }
+}
+
+/* ✅ Center single card when student */
+.navigation-cards.single-card {
+  display: flex;
+  justify-content: center;
+}
+
+/* Optional: control width for better appearance */
+.navigation-cards.single-card .nav-card {
+  max-width: 850px;
+  width: 100%;
 }
