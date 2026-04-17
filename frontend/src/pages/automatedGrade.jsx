@@ -11,12 +11,12 @@ export default function AutomatedGrade() {
   const navigate = useNavigate();
   const decodedCourseId = decodeURIComponent(courseId);
 
-  const [students, setStudents]     = useState([]);
-  const [stats, setStats]           = useState(null);
-  const [loading, setLoading]       = useState(true);
-  const [editMode, setEditMode]     = useState(null);
+  const [students, setStudents] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [editMode, setEditMode] = useState(null);
   const [weightages, setWeightages] = useState({});
-  const [maxMarks, setMaxMarks]     = useState({});
+  const [maxMarks, setMaxMarks] = useState({});
   const [boundaries, setBoundaries] = useState({});
 
   /* ── helpers ── */
@@ -35,7 +35,7 @@ export default function AutomatedGrade() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/grading/config/${encodeURIComponent(decodedCourseId)}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
       const data = await res.json();
       if (data.success && data.config) {
@@ -55,7 +55,7 @@ export default function AutomatedGrade() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/grading/compute/${encodeURIComponent(decodedCourseId)}`,
-        { method: "POST", credentials: "include" }
+        { method: "POST", credentials: "include" },
       );
       const data = await res.json();
       if (data.success && data.data) {
@@ -77,7 +77,7 @@ export default function AutomatedGrade() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
       const data = await res.json();
       if (data.success && data.data) {
@@ -103,7 +103,7 @@ export default function AutomatedGrade() {
       // Check gradesComputed flag
       const res = await fetch(
         `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
       const data = await res.json();
 
@@ -127,56 +127,88 @@ export default function AutomatedGrade() {
   const changeGrade = (index, dir) => {
     const updated = [...students];
     let idx = gradeOrder.indexOf(updated[index].manualGrade);
-    if (dir === "up"   && idx > 0)                   idx--;
+    if (dir === "up" && idx > 0) idx--;
     if (dir === "down" && idx < gradeOrder.length - 1) idx++;
     updated[index].manualGrade = gradeOrder[idx];
     setStudents(updated);
   };
 
   /* ── boundary change with cascade validation ── */
-  const handleBoundaryChange = (grade, value) => {
-    const num     = Number(value);
-    const updated = { ...boundaries, [grade]: num };
-    const order   = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
-    const idx     = order.indexOf(grade);
-
-    for (let i = idx - 1; i >= 0; i--) {
-      if (updated[order[i]] < updated[order[i + 1]])
-        updated[order[i]] = updated[order[i + 1]];
-      else break;
-    }
-    for (let i = idx + 1; i < order.length; i++) {
-      if (updated[order[i]] > updated[order[i - 1]])
-        updated[order[i]] = updated[order[i - 1]];
-      else break;
-    }
-    setBoundaries(updated);
+  const handleBoundaryChange = (grade, rawValue) => {
+    setBoundaries((prev) => ({
+      ...prev,
+      [grade]: rawValue === "" ? "" : Number(rawValue),
+    }));
   };
 
   /* ── apply boundary edit → manualGrade only ── */
-  const applyBoundaryEdit = () => {
-    const updated = students.map((s) => {
-      let grade = "F";
-      for (const g of gradeOrder) {
-        if (s.totalMarks >= (boundaries[g] ?? -Infinity)) {
-          grade = g;
-          break;
-        }
+  const applyBoundaryEdit = async () => {
+    const order = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
+
+    // Clean empty strings to 0
+    const cleanBoundaries = Object.fromEntries(
+      Object.entries(boundaries).map(([k, v]) => [k, v === "" ? 0 : Number(v)]),
+    );
+
+    // Find all violations and report them specifically
+    const violations = [];
+    for (let i = 0; i < order.length - 1; i++) {
+      if (cleanBoundaries[order[i]] < cleanBoundaries[order[i + 1]]) {
+        violations.push(
+          `${order[i]} (${cleanBoundaries[order[i]]}) must be ≥ ${order[i + 1]} (${cleanBoundaries[order[i + 1]]})`,
+        );
       }
-      return { ...s, manualGrade: grade }; // automatedGrade untouched
-    });
-    setStudents(updated);
-    setStats((prev) => ({ ...prev, boundaries: { ...boundaries } }));
-    setEditMode(null);
+    }
+
+    if (violations.length > 0) {
+      alert(`Invalid grade boundaries:\n\n${violations.join("\n")}`);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/grading/boundary/${encodeURIComponent(decodedCourseId)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ boundaries: cleanBoundaries }),
+        },
+      );
+
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.message || "Failed to apply boundaries");
+        return;
+      }
+
+      setStudents(
+        (data.data.students || []).map((s) => ({
+          ...s,
+          manualGrade: s.manualGrade || s.automatedGrade,
+        })),
+      );
+      setStats((prev) => ({
+        ...prev,
+        boundaries: data.data.stats?.boundaries || cleanBoundaries,
+      }));
+      setEditMode(null);
+    } catch (err) {
+      console.error("Boundary apply error:", err);
+      alert("Failed to apply boundaries.");
+    }
   };
 
   /* ── apply weightage edit → backend recomputes everything ── */
   const applyWeightageEdit = async () => {
     const weightTotal = Object.values(weightages).reduce(
-      (a, b) => a + Number(b), 0
+      (a, b) => a + Number(b),
+      0,
     );
     if (Math.round(weightTotal) !== 100) {
-      alert(`Weightages must sum to 100. Current sum: ${weightTotal.toFixed(1)}`);
+      alert(
+        `Weightages must sum to 100. Current sum: ${weightTotal.toFixed(1)}`,
+      );
       return;
     }
 
@@ -188,7 +220,7 @@ export default function AutomatedGrade() {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({ weightages }),
-        }
+        },
       );
       const configData = await configRes.json();
       if (!configData.success) {
@@ -215,7 +247,7 @@ export default function AutomatedGrade() {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({ students }),
-        }
+        },
       );
       navigate(`/statistical-analysis/${encodeURIComponent(decodedCourseId)}`);
     } catch (err) {
@@ -233,7 +265,10 @@ export default function AutomatedGrade() {
       <main className="auto-grade-main">
         <div className="floating-actions">
           {/* No Recompute button — only Save */}
-          <button className="compute-btn floating-btn save-btn" onClick={saveChanges}>
+          <button
+            className="compute-btn floating-btn save-btn"
+            onClick={saveChanges}
+          >
             Save Changes
           </button>
         </div>
@@ -246,7 +281,6 @@ export default function AutomatedGrade() {
           ) : (
             <>
               <div className="auto-layout">
-
                 {/* LEFT — Grade Distribution */}
                 <section className="card-section auto-left">
                   <h2 className="section-title">Grade Distribution</h2>
@@ -274,15 +308,20 @@ export default function AutomatedGrade() {
 
                 {/* RIGHT — Edit Panel */}
                 <div className="auto-right">
-
                   {/* Stats */}
                   {stats && (
                     <section className="card-section">
                       <h2 className="section-title">Stats</h2>
                       <table className="grade-table">
                         <tbody>
-                          <tr><td>Mean</td><td>{stats.mean ?? "-"}</td></tr>
-                          <tr><td>Std Dev</td><td>{stats.sd ?? "-"}</td></tr>
+                          <tr>
+                            <td>Mean</td>
+                            <td>{stats.mean ?? "-"}</td>
+                          </tr>
+                          <tr>
+                            <td>Std Dev</td>
+                            <td>{stats.sd ?? "-"}</td>
+                          </tr>
                         </tbody>
                       </table>
                     </section>
@@ -292,18 +331,27 @@ export default function AutomatedGrade() {
                   <section className="card-section">
                     <h2 className="section-title">Edit Mode</h2>
                     <p className="edit-mode-note">
-                      Only one active at a time. All changes write to manual grade only.
+                      Only one active at a time. All changes write to manual
+                      grade only.
                     </p>
                     <div className="mode-btn-row">
                       <button
                         className={`mode-btn ${editMode === "weightage" ? "active" : ""}`}
-                        onClick={() => setEditMode(editMode === "weightage" ? null : "weightage")}
+                        onClick={() =>
+                          setEditMode(
+                            editMode === "weightage" ? null : "weightage",
+                          )
+                        }
                       >
                         Edit Weightages
                       </button>
                       <button
                         className={`mode-btn ${editMode === "boundary" ? "active" : ""}`}
-                        onClick={() => setEditMode(editMode === "boundary" ? null : "boundary")}
+                        onClick={() =>
+                          setEditMode(
+                            editMode === "boundary" ? null : "boundary",
+                          )
+                        }
                       >
                         Edit Boundaries
                       </button>
@@ -316,7 +364,8 @@ export default function AutomatedGrade() {
                       <h2 className="section-title">Weightages</h2>
                       <p className="edit-mode-note">
                         Formula: (scored / max) × weight. Must sum to 100%.
-                        Recomputes total marks, mean, SD, boundaries and manual grades.
+                        Recomputes total marks, mean, SD, boundaries and manual
+                        grades.
                       </p>
                       <table className="grade-table">
                         <thead>
@@ -330,7 +379,12 @@ export default function AutomatedGrade() {
                           {Object.entries(weightages).map(([k, v]) => (
                             <tr key={k}>
                               <td>{k}</td>
-                              <td style={{ color: "var(--color-text-secondary)", fontSize: "0.85rem" }}>
+                              <td
+                                style={{
+                                  color: "var(--color-text-secondary)",
+                                  fontSize: "0.85rem",
+                                }}
+                              >
                                 {maxMarks[k] ?? "—"}
                               </td>
                               <td>
@@ -340,7 +394,10 @@ export default function AutomatedGrade() {
                                   min={0}
                                   max={100}
                                   onChange={(e) =>
-                                    setWeightages({ ...weightages, [k]: Number(e.target.value) })
+                                    setWeightages({
+                                      ...weightages,
+                                      [k]: Number(e.target.value),
+                                    })
                                   }
                                 />
                               </td>
@@ -348,17 +405,35 @@ export default function AutomatedGrade() {
                           ))}
                         </tbody>
                       </table>
-                      <p className="edit-mode-note" style={{ marginTop: "0.5rem" }}>
+                      <p
+                        className="edit-mode-note"
+                        style={{ marginTop: "0.5rem" }}
+                      >
                         Total:{" "}
-                        <strong style={{
-                          color: Math.round(Object.values(weightages).reduce((a, b) => a + Number(b), 0)) === 100
-                            ? "var(--color-text-success)"
-                            : "var(--color-text-danger)"
-                        }}>
-                          {Object.values(weightages).reduce((a, b) => a + Number(b), 0)}%
+                        <strong
+                          style={{
+                            color:
+                              Math.round(
+                                Object.values(weightages).reduce(
+                                  (a, b) => a + Number(b),
+                                  0,
+                                ),
+                              ) === 100
+                                ? "var(--color-text-success)"
+                                : "var(--color-text-danger)",
+                          }}
+                        >
+                          {Object.values(weightages).reduce(
+                            (a, b) => a + Number(b),
+                            0,
+                          )}
+                          %
                         </strong>
                       </p>
-                      <button className="apply-btn" onClick={applyWeightageEdit}>
+                      <button
+                        className="apply-btn"
+                        onClick={applyWeightageEdit}
+                      >
                         Apply &amp; Recompute
                       </button>
                     </section>
@@ -369,12 +444,12 @@ export default function AutomatedGrade() {
                     <section className="card-section">
                       <h2 className="section-title">Grade Boundaries</h2>
                       <p className="edit-mode-note">
-                        Minimum marks per grade. Auto-adjusts to stay descending.
-                        Writes to manual grade only.
+                        Set minimum marks per grade. Boundaries are validated
+                        when you click Apply.
                       </p>
                       <table className="grade-table">
                         <tbody>
-                          {gradeOrder.map((g, i) => (
+                          {gradeOrder.map((g) => (
                             <tr key={g}>
                               <td>{g}</td>
                               <td>
@@ -382,14 +457,11 @@ export default function AutomatedGrade() {
                                   type="number"
                                   value={boundaries[g] ?? ""}
                                   min={0}
-                                  onChange={(e) => handleBoundaryChange(g, e.target.value)}
+                                  onChange={(e) =>
+                                    handleBoundaryChange(g, e.target.value)
+                                  }
                                 />
                               </td>
-                              {i > 0 && boundaries[g] === boundaries[gradeOrder[i - 1]] && (
-                                <td style={{ fontSize: "0.75rem", color: "var(--color-text-warning)" }}>
-                                  = {gradeOrder[i - 1]}
-                                </td>
-                              )}
                             </tr>
                           ))}
                         </tbody>
@@ -423,12 +495,18 @@ export default function AutomatedGrade() {
                             <td>{s.studentName}</td>
                             <td>{s.studentRollNo}</td>
                             <td>{s.totalMarks}</td>
-                            <td className="auto-grade">{s.automatedGrade || "-"}</td>
-                            <td className="manual-grade">{s.manualGrade || "-"}</td>
+                            <td className="auto-grade">
+                              {s.automatedGrade || "-"}
+                            </td>
+                            <td className="manual-grade">
+                              {s.manualGrade || "-"}
+                            </td>
                           </tr>
                         ))
                       ) : (
-                        <tr><td colSpan="6">No student data</td></tr>
+                        <tr>
+                          <td colSpan="6">No student data</td>
+                        </tr>
                       )}
                     </tbody>
                   </table>

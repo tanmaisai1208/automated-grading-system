@@ -121,10 +121,42 @@ const saveManualGrades = async (req, res, next) => {
   }
 };
 
+const applyBoundaryEdit = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const { boundaries } = req.body;
+
+    if (!boundaries || typeof boundaries !== "object") {
+      return res.status(400).json({
+        success: false,
+        message: "boundaries object is required",
+      });
+    }
+
+    const result = await gradingService.applyBoundaryEdit(courseId, boundaries);
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+    if (result.error) {
+      return res.status(400).json({ success: false, message: result.error });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Boundaries applied successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   computeGrades,
   getGradesByCourse,
   setGradeConfig,
   getGradeConfig,
   saveManualGrades,
+  applyBoundaryEdit,   // ← export
 };

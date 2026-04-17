@@ -78,35 +78,53 @@ const computeGrades = async (courseId) => {
   );
   if (!course) return null;
 
-  // ── GUARD: already computed, never overwrite automatedGrade again ──
+  // ── GUARD: already computed, return existing data as-is ──
   if (course.gradesComputed === true) {
-    return { students: course.students || [], stats: course.stats || {} };
+    return {
+      students:       course.students || [],
+      stats:          course.stats    || {},
+      gradesComputed: true,
+    };
   }
 
-  const students = course.students || [];
-  const marksArray = students.map((s) => s.totalMarks || 0);
+  // ── STEP 1: Recompute totalMarks from raw component marks ──
+  // Always do this before grading so uploaded raw marks are the source of truth
+  const weightages = course.weightages || {};
+  const maxMarks   = course.totalMarks  || {};
 
-  const mean = calculateMean(marksArray);
-  const sd   = calculateStdDev(marksArray, mean);
+  let students = course.students || [];
+
+  if (Object.keys(weightages).length > 0 && Object.keys(maxMarks).length > 0) {
+    students = recomputeTotalMarks(students, weightages, maxMarks);
+  }
+
+  // ── STEP 2: Compute mean, SD, boundaries from fresh totalMarks ──
+  const marksArray = students.map((s) => s.totalMarks || 0);
+  const mean       = calculateMean(marksArray);
+  const sd         = calculateStdDev(marksArray, mean);
   const boundaries = getGradeBoundaries(mean, sd);
 
+  // ── STEP 3: Assign automatedGrade AND seed manualGrade ──
   course.students = students.map((student) => ({
     ...student,
     automatedGrade: getGrade(student.totalMarks || 0, boundaries),
-    // seed manualGrade on first compute only
-    manualGrade: student.manualGrade || getGrade(student.totalMarks || 0, boundaries),
+    manualGrade:    getGrade(student.totalMarks || 0, boundaries),
   }));
 
+  // ── STEP 4: Save stats and lock the flag ──
   if (!course.stats) course.stats = {};
   course.stats.mean       = Number(mean.toFixed(2));
   course.stats.sd         = Number(sd.toFixed(2));
   course.stats.boundaries = boundaries;
-
-  // ── Lock: never recompute automatedGrade after this ──
-  course.gradesComputed = true;
+  course.gradesComputed   = true;
 
   writeCourses(courses);
-  return { students: course.students, stats: course.stats };
+
+  return {
+    students:       course.students,
+    stats:          course.stats,
+    gradesComputed: true,
+  };
 };
 
 /* ─── Get grades ─────────────────────────────────────────────────────────── */
@@ -218,10 +236,50 @@ const getGradeConfig = async (courseId) => {
   };
 };
 
+/* ─── Apply manual boundary edit ────────────────────────────────────────────
+   Saves new boundaries to stats.boundaries and reassigns manualGrade.
+   automatedGrade is never touched.
+──────────────────────────────────────────────────────────────────────────── */
+const applyBoundaryEdit = async (courseId, boundaries) => {
+  const courses = readCourses();
+  const index = courses.findIndex(
+    (c) => c.courseId.toLowerCase() === courseId.toLowerCase()
+  );
+  if (index === -1) return null;
+
+  // Validate boundaries are strictly descending
+  const order = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
+  for (let i = 0; i < order.length - 1; i++) {
+    if (boundaries[order[i]] < boundaries[order[i + 1]]) {
+      return {
+        error: `Invalid boundaries: ${order[i]} (${boundaries[order[i]]}) must be ≥ ${order[i + 1]} (${boundaries[order[i + 1]]})`,
+      };
+    }
+  }
+
+  // Save new boundaries
+  if (!courses[index].stats) courses[index].stats = {};
+  courses[index].stats.boundaries = boundaries;
+
+  // Reassign manualGrade from new boundaries — automatedGrade untouched
+  courses[index].students = (courses[index].students || []).map((student) => ({
+    ...student,
+    manualGrade: getGrade(student.totalMarks || 0, boundaries),
+  }));
+
+  writeCourses(courses);
+
+  return {
+    students: courses[index].students,
+    stats:    courses[index].stats,
+  };
+};
+
 module.exports = {
   computeGrades,
   getGradesByCourse,
   saveManualGrades,
   setGradeConfig,
   getGradeConfig,
+  applyBoundaryEdit,   // ← export
 };
