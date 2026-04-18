@@ -1,0 +1,110 @@
+.register-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+}
+
+.register-main {
+  flex: 1;
+  padding: 3rem 0;
+}
+
+.register-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 0 2rem;
+  text-align: center;
+}
+
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: #475569;
+  margin-bottom: 2.5rem;
+}
+
+.register-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  padding: 3rem;
+  max-width: 520px;
+  margin: auto;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.register-form input,
+.register-form select {
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5f5;
+  font-size: 1rem;
+  outline: none;
+}
+
+.register-form input:focus,
+.register-form select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.primary-btn {
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+}
+
+.register-link-text {
+  margin-top: 1rem;
+  text-align: center;
+  color: #475569;
+}
+
+.register-link-text a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-link-text a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .register-main {
+    padding: 2rem 0;
+  }
+
+  .register-container {
+    padding: 0 1rem;
+  }
+
+  .register-card {
+    padding: 2rem 1.25rem;
+  }
+
+  .page-title {
+    font-size: 2.2rem;
+  }
+}

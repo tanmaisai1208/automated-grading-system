@@ -48,29 +48,28 @@
 //   return useContext(AuthContext);
 // }
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   loginUser as loginUserApi,
+  registerUser as registerUserApi,
   googleLoginUser as googleLoginUserApi,
   logoutUser as logoutUserApi,
-} from "../services/authService";
+} from '../services/authService';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-
   const [user, setUser] = useState(null);
 
-  // ✅ Load user from localStorage properly
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem('user');
 
-    if (storedUser && storedUser !== "undefined") {
+    if (storedUser && storedUser !== 'undefined') {
       try {
         setUser(JSON.parse(storedUser));
       } catch (err) {
-        console.error("Invalid user in localStorage");
-        localStorage.removeItem("user");
+        console.error('Invalid user in localStorage');
+        localStorage.removeItem('user');
       }
     }
   }, []);
@@ -79,8 +78,13 @@ export function AuthProvider({ children }) {
     const response = await loginUserApi(email, password);
 
     setUser(response.user);
-    localStorage.setItem("user", JSON.stringify(response.user));
+    localStorage.setItem('user', JSON.stringify(response.user));
 
+    return response.user;
+  };
+
+  const register = async (userData) => {
+    const response = await registerUserApi(userData);
     return response.user;
   };
 
@@ -88,7 +92,7 @@ export function AuthProvider({ children }) {
     const response = await googleLoginUserApi(name, email);
 
     setUser(response.user);
-    localStorage.setItem("user", JSON.stringify(response.user));
+    localStorage.setItem('user', JSON.stringify(response.user));
 
     return response.user;
   };
@@ -96,19 +100,17 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await logoutUserApi();
-      // setUser(null);
-      // localStorage.removeItem("user");
     } catch (error) {
-      console.error("Logout API error:", error);
+      console.error('Logout API error:', error);
     }
 
     setUser(null);
-    localStorage.removeItem("user");
-    window.location.href = "/login"; // Force redirect to login after logout
+    localStorage.removeItem('user');
+    window.location.href = '/login';
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, googleLogin, logout }}>
+    <AuthContext.Provider value={{ user, login, register, googleLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

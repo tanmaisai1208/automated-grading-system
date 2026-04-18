@@ -27,6 +27,29 @@ const loginUser = async (req, res, next) => {
   }
 };
 
+/* Register */
+const registerUser = async (req, res, next) => {
+  try {
+    const { name, email, password, role, rollNo } = req.body;
+
+    const user = await authService.registerUser({
+      name,
+      email,
+      password,
+      role,
+      rollNo,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful',
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /* Google login */
 const googleLoginUser = async (req, res, next) => {
   try {
@@ -64,6 +87,7 @@ const getCurrentUser = async (req, res, next) => {
     next(error);
   }
 };
+
 
 /* Logout */
 const logoutUser = async (req, res, next) => {

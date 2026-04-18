@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
-import "./Login.css";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import Navbar from '../components/navbar';
+import Footer from '../components/footer';
+import './Login.css';
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -15,29 +15,29 @@ export default function Login() {
     e.preventDefault();
 
     if (!email || !password) {
-      alert("Enter credentials");
+      alert('Enter credentials');
       return;
     }
 
     try {
       await login(email, password);
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error) {
-      alert(error.message || "Login failed");
+      alert(error.message || 'Login failed');
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
-      const googleEmail = prompt("Enter your institute Google email:");
+      const googleEmail = prompt('Enter your institute Google email:');
       if (!googleEmail) return;
 
-      const googleName = prompt("Enter your name:");
-      await googleLogin(googleName || "Google User", googleEmail);
+      const googleName = prompt('Enter your name:');
+      await googleLogin(googleName || 'Google User', googleEmail);
 
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error) {
-      alert(error.message || "Google login failed");
+      alert(error.message || 'Google login failed');
     }
   };
 
@@ -47,16 +47,13 @@ export default function Login() {
 
       <main className="login-main">
         <div className="login-container">
-
           <h1 className="page-title">Welcome Back</h1>
           <p className="page-subtitle">
             Sign in to access the Automated Grading System
           </p>
 
           <section className="login-card">
-
             <form onSubmit={handleLogin} className="login-form">
-
               <input
                 type="email"
                 placeholder="Email address"
@@ -74,8 +71,12 @@ export default function Login() {
               <button type="submit" className="primary-btn">
                 Sign In
               </button>
-
             </form>
+
+            <div className="register-text">
+              <span>Don&apos;t have an account?</span>
+              <Link to="/register">Register</Link>
+            </div>
 
             <div className="divider">
               <span>or</span>
@@ -110,9 +111,7 @@ export default function Login() {
 
               Continue with Institute Mail ID
             </button>
-
           </section>
-
         </div>
       </main>
 
