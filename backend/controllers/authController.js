@@ -106,6 +106,7 @@ const logoutUser = async (req, res, next) => {
 module.exports = {
   loginUser,
   googleLoginUser,
+  registerUser,
   getCurrentUser,
   logoutUser,
 };

@@ -15,5 +15,14 @@
     "role": "student",
     "rollNo": "BT22CSE007",
     "authProvider": "local"
+  },
+  {
+    "id": 3,
+    "name": "tanmai",
+    "email": "cse230001019@iiti.ac.in",
+    "password": "12345",
+    "role": "student",
+    "authProvider": "local",
+    "rollNo": "230001019"
   }
 ]

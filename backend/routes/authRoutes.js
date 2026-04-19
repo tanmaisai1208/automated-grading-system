@@ -2,6 +2,7 @@ const express = require("express");
 const {
   loginUser,
   googleLoginUser,
+  registerUser,
   getCurrentUser,
   logoutUser,
 } = require("../controllers/authController");
