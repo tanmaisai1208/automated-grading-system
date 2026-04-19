@@ -66,9 +66,9 @@ function median(arr) {
 }
 
 function stdDev(arr) {
-  if (arr.length < 2) return 0;
+  if (!arr.length) return 0;
   const m = mean(arr);
-  const v = arr.reduce((acc, x) => acc + (x - m) ** 2, 0) / (arr.length - 1);
+  const v = arr.reduce((acc, x) => acc + (x - m) ** 2, 0) / (arr.length);
   return Math.sqrt(v);
 }
 

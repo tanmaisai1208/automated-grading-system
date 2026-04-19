@@ -3,8 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import "./automatedGrade.css";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 
-const gradeOrder = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
+const gradeOrder = ["AP", "AA", "AB", "BB", "BC", "CC", "CD", "DD", "FR"];
 
 export default function AutomatedGrade() {
   const { courseId } = useParams();
@@ -70,6 +72,157 @@ export default function AutomatedGrade() {
       setLoading(false);
     }
   };
+  function GradeHistogram({ gradeOrder, countMap, boundaries }) {
+    const canvasRef = React.useRef(null);
+    const chartRef = React.useRef(null);
+
+    useEffect(() => {
+      if (!canvasRef.current) return;
+
+      // Destroy previous instance before re-creating
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
+
+      const counts = gradeOrder.map((g) => countMap[g] ?? 0);
+      const maxCount = Math.max(...counts, 1);
+
+      chartRef.current = new Chart(canvasRef.current, {
+        type: "bar",
+        data: {
+          labels: gradeOrder.map((g) =>
+            boundaries?.[g] !== undefined ? `${g}\n(≥${boundaries[g]})` : g,
+          ),
+          datasets: [
+            {
+              label: "Students",
+              data: counts,
+              backgroundColor: counts.map((c) => {
+                // colour by relative density
+                const ratio = c / maxCount;
+                if (ratio === 0) return "#D3D1C7";
+                if (ratio < 0.33) return "#9FE1CB";
+                if (ratio < 0.66) return "#1D9E75";
+                return "#0F6E56";
+              }),
+              borderColor: "transparent",
+              borderRadius: 6,
+              borderSkipped: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => {
+                  const grade = gradeOrder[items[0].dataIndex];
+                  const boundary = boundaries?.[grade];
+                  return boundary !== undefined
+                    ? `${grade}  —  min ${boundary} marks`
+                    : grade;
+                },
+                label: (item) =>
+                  ` ${item.raw} student${item.raw !== 1 ? "s" : ""}`,
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: "#888780",
+                font: { size: 12 },
+              },
+              border: { display: false },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+                color: "#888780",
+                font: { size: 12 },
+                precision: 0,
+              },
+              grid: {
+                color: "rgba(136,135,128,0.15)",
+              },
+              border: { display: false },
+            },
+          },
+        },
+      });
+
+      return () => {
+        if (chartRef.current) {
+          chartRef.current.destroy();
+          chartRef.current = null;
+        }
+      };
+    }, [gradeOrder, countMap, boundaries]);
+
+    return (
+      <>
+        {/* Custom legend */}
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            marginBottom: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          {gradeOrder.map((g) => (
+            <span
+              key={g}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "12px",
+                color: "var(--color-text-secondary)",
+              }}
+            >
+              <span
+                style={{ fontWeight: 500, color: "var(--color-text-primary)" }}
+              >
+                {g}
+              </span>
+              {boundaries?.[g] !== undefined && `≥ ${boundaries[g]}`}
+              <span
+                style={{
+                  background: "var(--color-background-secondary)",
+                  borderRadius: "10px",
+                  padding: "1px 8px",
+                  fontSize: "11px",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                {countMap[g] ?? 0}
+              </span>
+            </span>
+          ))}
+        </div>
+
+        {/* Chart */}
+        <div style={{ position: "relative", width: "100%", height: "220px" }}>
+          <canvas
+            ref={canvasRef}
+            role="img"
+            aria-label={`Bar chart of grade distribution: ${gradeOrder.map((g) => `${g} ${countMap[g] ?? 0} students`).join(", ")}`}
+          >
+            {gradeOrder
+              .map((g) => `${g}: ${countMap[g] ?? 0} students`)
+              .join(", ")}
+          </canvas>
+        </div>
+      </>
+    );
+  }
 
   /* ── fetch existing grades (when gradesComputed already true) ── */
   const fetchGrades = async () => {
@@ -143,7 +296,7 @@ export default function AutomatedGrade() {
 
   /* ── apply boundary edit → manualGrade only ── */
   const applyBoundaryEdit = async () => {
-    const order = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
+    const order = ["AP", "AA", "AB", "BB", "BC", "CC", "CD", "DD"];
 
     // Clean empty strings to 0
     const cleanBoundaries = Object.fromEntries(
@@ -284,49 +437,15 @@ export default function AutomatedGrade() {
                 {/* LEFT — Grade Distribution */}
                 <section className="card-section auto-left">
                   <h2 className="section-title">Grade Distribution</h2>
-                  <div className="table-scroll">
-                    <table className="student-table">
-                      <thead>
-                        <tr>
-                          <th>Grade</th>
-                          <th>Min Marks (≥)</th>
-                          <th>Students</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {gradeOrder.map((grade) => (
-                          <tr key={grade}>
-                            <td className="auto-grade">{grade}</td>
-                            <td>{stats?.boundaries?.[grade] ?? "-"}</td>
-                            <td>{countMap[grade] ?? 0}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <GradeHistogram
+                    gradeOrder={gradeOrder}
+                    countMap={countMap}
+                    boundaries={stats?.boundaries}
+                  />
                 </section>
 
                 {/* RIGHT — Edit Panel */}
                 <div className="auto-right">
-                  {/* Stats */}
-                  {stats && (
-                    <section className="card-section">
-                      <h2 className="section-title">Stats</h2>
-                      <table className="grade-table">
-                        <tbody>
-                          <tr>
-                            <td>Mean</td>
-                            <td>{stats.mean ?? "-"}</td>
-                          </tr>
-                          <tr>
-                            <td>Std Dev</td>
-                            <td>{stats.sd ?? "-"}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </section>
-                  )}
-
                   {/* Mode selector */}
                   <section className="card-section">
                     <h2 className="section-title">Edit Mode</h2>
@@ -457,6 +576,7 @@ export default function AutomatedGrade() {
                                   type="number"
                                   value={boundaries[g] ?? ""}
                                   min={0}
+                                  step="0.01" // ← add this
                                   onChange={(e) =>
                                     handleBoundaryChange(g, e.target.value)
                                   }
@@ -469,6 +589,24 @@ export default function AutomatedGrade() {
                       <button className="apply-btn" onClick={applyBoundaryEdit}>
                         Apply Boundaries
                       </button>
+                    </section>
+                  )}
+                  {/* Stats */}
+                  {stats && (
+                    <section className="card-section">
+                      <h2 className="section-title">Stats</h2>
+                      <table className="grade-table">
+                        <tbody>
+                          <tr>
+                            <td>Mean</td>
+                            <td>{stats.mean ?? "-"}</td>
+                          </tr>
+                          <tr>
+                            <td>Std Dev</td>
+                            <td>{stats.sd ?? "-"}</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </section>
                   )}
                 </div>
@@ -516,7 +654,6 @@ export default function AutomatedGrade() {
           )}
         </div>
       </main>
-
       <Footer />
     </div>
   );
