@@ -23,13 +23,13 @@ function calculateStdDev(arr, mean) {
 
 function getGradeBoundaries(mean, sd) {
   return {
-    AA: Math.round(mean + 1.5 * sd),
-    AB: Math.round(mean + 0.5 * sd),
-    BB: Math.round(mean),
-    BC: Math.round(mean - 0.5 * sd),
-    CC: Math.round(mean - sd),
-    CD: Math.round(mean - 1.5 * sd),
-    DD: Math.round(mean - 2 * sd),
+    AA: Number((mean + 1.5 * sd).toFixed(2)),
+    AB: Number((mean + 0.5 * sd).toFixed(2)),
+    BB: Number((mean).toFixed(2)),
+    BC: Number((mean - 0.5 * sd).toFixed(2)),
+    CC: Number((mean - sd).toFixed(2)),
+    CD: Number((mean - 1.5 * sd).toFixed(2)),
+    DD: Number((mean - 2 * sd).toFixed(2)),
   };
 }
 
@@ -41,14 +41,9 @@ function getGrade(marks, boundaries) {
   if (marks >= boundaries.CC) return "CC";
   if (marks >= boundaries.CD) return "CD";
   if (marks >= boundaries.DD) return "DD";
-  return "F";
+  return "FR";
 }
 
-/*
-  Formula: (studentMark / maxMark) * weightage
-  weightages = { quiz: 30, midsem: 40, ... }  ← percentages, must sum to 100
-  maxMarks   = { quiz: 10, midsem: 30, ... }  ← stored as course.totalMarks in JSON
-*/
 function recomputeTotalMarks(students, weightages, maxMarks) {
   const keys = Object.keys(weightages);
   if (keys.length === 0) return students;
@@ -58,8 +53,7 @@ function recomputeTotalMarks(students, weightages, maxMarks) {
       const scored  = Number(student[key] || 0);
       const maxMark = Number(maxMarks[key] || 0);
       const weight  = Number(weightages[key] || 0);
-
-      if (!maxMark) return sum + scored; // fallback if maxMark missing
+      if (!maxMark) return sum + scored;
       return sum + (scored / maxMark) * weight;
     }, 0);
 
@@ -67,10 +61,38 @@ function recomputeTotalMarks(students, weightages, maxMarks) {
   });
 }
 
-/* ─── Compute grades ───────────────────────────────────────────────────────
-   Only runs if course.gradesComputed is false/missing.
-   Sets automatedGrade AND manualGrade (initial seed) then locks with flag.
+/* ─── AP Grade assignment ────────────────────────────────────────────────────
+   Rules:
+   1. Count how many students got AA.
+   2. AA count must be >= 2% of total class — otherwise no AP awarded.
+   3. Top 2% of the ENTIRE class (by totalMarks) get AP, replacing their grade.
+   4. "top 2%" is always at least 1 student (Math.ceil), but only if rule 2 passes.
+   5. Ties at the cutoff mark all get AP.
+
+   Operates on the gradeField passed in — so it works for both
+   automatedGrade (initial compute) and manualGrade (subsequent edits).
 ──────────────────────────────────────────────────────────────────────────── */
+function assignAPGrade(students, gradeField) {
+  const total      = students.length;
+  const apCount    = Math.ceil(total * 0.02);   // top 2%, min 1
+  const aaCount    = students.filter((s) => s[gradeField] === "AA").length;
+  const aaThreshold = Math.ceil(total * 0.02);  // AA must be >= 2% of class
+
+  // Not enough AA students — no AP awarded
+  if (aaCount < aaThreshold) return students;
+
+  // Sort descending by totalMarks to find the cutoff mark for top 2%
+  const sorted     = [...students].sort((a, b) => b.totalMarks - a.totalMarks);
+  const cutoffMark = sorted[apCount - 1]?.totalMarks ?? Infinity;
+
+  // Assign AP to everyone at or above the cutoff mark (handles ties)
+  return students.map((s) => ({
+    ...s,
+    [gradeField]: s.totalMarks >= cutoffMark ? "AP" : s[gradeField],
+  }));
+}
+
+/* ─── Compute grades ─────────────────────────────────────────────────────── */
 const computeGrades = async (courseId) => {
   const courses = readCourses();
   const course = courses.find(
@@ -78,7 +100,6 @@ const computeGrades = async (courseId) => {
   );
   if (!course) return null;
 
-  // ── GUARD: already computed, return existing data as-is ──
   if (course.gradesComputed === true) {
     return {
       students:       course.students || [],
@@ -87,36 +108,36 @@ const computeGrades = async (courseId) => {
     };
   }
 
-  // ── STEP 1: Recompute totalMarks from raw component marks ──
-  // Always do this before grading so uploaded raw marks are the source of truth
   const weightages = course.weightages || {};
   const maxMarks   = course.totalMarks  || {};
-
-  let students = course.students || [];
+  let students     = course.students    || [];
 
   if (Object.keys(weightages).length > 0 && Object.keys(maxMarks).length > 0) {
     students = recomputeTotalMarks(students, weightages, maxMarks);
   }
 
-  // ── STEP 2: Compute mean, SD, boundaries from fresh totalMarks ──
   const marksArray = students.map((s) => s.totalMarks || 0);
   const mean       = calculateMean(marksArray);
   const sd         = calculateStdDev(marksArray, mean);
   const boundaries = getGradeBoundaries(mean, sd);
 
-  // ── STEP 3: Assign automatedGrade AND seed manualGrade ──
-  course.students = students.map((student) => ({
+  // Assign AA/AB/BB... first
+  students = students.map((student) => ({
     ...student,
     automatedGrade: getGrade(student.totalMarks || 0, boundaries),
     manualGrade:    getGrade(student.totalMarks || 0, boundaries),
   }));
 
-  // ── STEP 4: Save stats and lock the flag ──
+  // Then elevate top 2% to AP on both fields
+  students = assignAPGrade(students, "automatedGrade");
+  students = assignAPGrade(students, "manualGrade");
+
   if (!course.stats) course.stats = {};
   course.stats.mean       = Number(mean.toFixed(2));
   course.stats.sd         = Number(sd.toFixed(2));
   course.stats.boundaries = boundaries;
   course.gradesComputed   = true;
+  course.students         = students;
 
   writeCourses(courses);
 
@@ -137,7 +158,7 @@ const getGradesByCourse = async (courseId) => {
   return {
     students:       course.students       || [],
     stats:          course.stats          || {},
-    gradesComputed: course.gradesComputed || false, // ← frontend checks this
+    gradesComputed: course.gradesComputed || false,
   };
 };
 
@@ -162,13 +183,7 @@ const saveManualGrades = async (courseId, students) => {
   return course.students;
 };
 
-/* ─── Set grading config ─────────────────────────────────────────────────
-   Weightage edit:
-     1. Validates sum === 100
-     2. Recomputes totalMarks using (scored/maxMark)*weight
-     3. Reassigns manualGrade from new totals using EXISTING boundaries
-     4. NEVER touches automatedGrade
-──────────────────────────────────────────────────────────────────────────── */
+/* ─── Set grading config ─────────────────────────────────────────────────── */
 const setGradeConfig = async (courseId, config) => {
   const courses = readCourses();
   const index = courses.findIndex(
@@ -177,7 +192,6 @@ const setGradeConfig = async (courseId, config) => {
   if (index === -1) return null;
 
   if (config.weightages) {
-    // Validate sum = 100
     const total = Object.values(config.weightages).reduce(
       (a, b) => a + Number(b), 0
     );
@@ -188,30 +202,30 @@ const setGradeConfig = async (courseId, config) => {
     courses[index].weightages = config.weightages;
     const maxMarks = courses[index].totalMarks || {};
 
-    // 1. Recompute totalMarks for every student
-    const studentsWithNewTotals = recomputeTotalMarks(
+    let studentsWithNewTotals = recomputeTotalMarks(
       courses[index].students || [],
       config.weightages,
       maxMarks
     );
 
-    // 2. Recompute mean, sd, boundaries from new totalMarks
     const marksArray = studentsWithNewTotals.map((s) => s.totalMarks || 0);
-    const mean = calculateMean(marksArray);
-    const sd   = calculateStdDev(marksArray, mean);
+    const mean       = calculateMean(marksArray);
+    const sd         = calculateStdDev(marksArray, mean);
     const boundaries = getGradeBoundaries(mean, sd);
 
-    // 3. Update stats
     if (!courses[index].stats) courses[index].stats = {};
     courses[index].stats.mean       = Number(mean.toFixed(2));
     courses[index].stats.sd         = Number(sd.toFixed(2));
     courses[index].stats.boundaries = boundaries;
 
-    // 4. Assign manualGrade from new boundaries — automatedGrade untouched
-    courses[index].students = studentsWithNewTotals.map((student) => ({
+    // Assign manualGrade then elevate AP — automatedGrade untouched
+    studentsWithNewTotals = studentsWithNewTotals.map((student) => ({
       ...student,
       manualGrade: getGrade(student.totalMarks, boundaries),
     }));
+    studentsWithNewTotals = assignAPGrade(studentsWithNewTotals, "manualGrade");
+
+    courses[index].students = studentsWithNewTotals;
   }
 
   if (config.autoCutoffs)   courses[index].autoCutoffs   = config.autoCutoffs;
@@ -230,16 +244,13 @@ const getGradeConfig = async (courseId) => {
   if (!course) return null;
   return {
     weightages:    course.weightages    || {},
-    totalMarks:    course.totalMarks    || {}, // max marks per component
+    totalMarks:    course.totalMarks    || {},
     autoCutoffs:   course.autoCutoffs   || {},
     manualCutoffs: course.manualCutoffs || {},
   };
 };
 
-/* ─── Apply manual boundary edit ────────────────────────────────────────────
-   Saves new boundaries to stats.boundaries and reassigns manualGrade.
-   automatedGrade is never touched.
-──────────────────────────────────────────────────────────────────────────── */
+/* ─── Apply manual boundary edit ─────────────────────────────────────────── */
 const applyBoundaryEdit = async (courseId, boundaries) => {
   const courses = readCourses();
   const index = courses.findIndex(
@@ -247,8 +258,7 @@ const applyBoundaryEdit = async (courseId, boundaries) => {
   );
   if (index === -1) return null;
 
-  // Validate boundaries are strictly descending
-  const order = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
+  const order = ["AP", "AA", "AB", "BB", "BC", "CC", "CD", "DD"];
   for (let i = 0; i < order.length - 1; i++) {
     if (boundaries[order[i]] < boundaries[order[i + 1]]) {
       return {
@@ -257,15 +267,17 @@ const applyBoundaryEdit = async (courseId, boundaries) => {
     }
   }
 
-  // Save new boundaries
   if (!courses[index].stats) courses[index].stats = {};
   courses[index].stats.boundaries = boundaries;
 
-  // Reassign manualGrade from new boundaries — automatedGrade untouched
-  courses[index].students = (courses[index].students || []).map((student) => ({
+  // Assign manualGrade from new boundaries then elevate AP
+  let updatedStudents = (courses[index].students || []).map((student) => ({
     ...student,
     manualGrade: getGrade(student.totalMarks || 0, boundaries),
   }));
+  updatedStudents = assignAPGrade(updatedStudents, "manualGrade");
+
+  courses[index].students = updatedStudents;
 
   writeCourses(courses);
 
@@ -281,5 +293,5 @@ module.exports = {
   saveManualGrades,
   setGradeConfig,
   getGradeConfig,
-  applyBoundaryEdit,   // ← export
+  applyBoundaryEdit,
 };
