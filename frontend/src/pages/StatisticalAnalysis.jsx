@@ -326,7 +326,7 @@ const componentBar = {
       <main className="analysis-main">
         <div className="analysis-container">
           <header className="analysis-header">
-            <div className="analysis-badge">📈 Statistical Insights</div>
+            <div className="analysis-badge">Statistical Insights</div>
             <h1 className="analysis-title">
               Performance Analytics <span className="analysis-course">{courseId}</span>
             </h1>
