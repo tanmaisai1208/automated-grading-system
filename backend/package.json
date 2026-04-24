@@ -1,10 +1,26 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
+  "bin": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:frontend": "cd ../frontend && npm install && npm run build",
+    "copy:frontend": "xcopy /E /I /Y ..\\frontend\\dist public",
+    "copy:data": "mkdir ..\\dist\\data 2>nul & xcopy /Y data\\*.json ..\\dist\\data\\",
+    "build:binary": "pkg . --target node18-linux-x64 --output ../dist/grading-system",
+    "build": "npm run build:frontend && npm run copy:frontend && npm run copy:data && npm run build:binary"
+  },
+  "pkg": {
+    "targets": [
+      "node18-linux-x64"
+    ],
+    "assets": [
+      "public/**/*",
+      "data/**/*"
+    ],
+    "outputPath": "../dist"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +36,8 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "pkg": "^5.8.1"
   },
   "description": ""
 }

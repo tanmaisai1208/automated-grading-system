@@ -214,9 +214,10 @@
 
 const fs = require("fs").promises;
 const path = require("path");
+const { COURSES_FILE, USERS_FILE } = require("../paths");
 
-const dataFilePath = path.join(__dirname, "../data/courses.json");
-const usersFilePath = path.join(__dirname, "../data/users.json");
+const dataFilePath = COURSES_FILE;
+const usersFilePath = USERS_FILE;
 
 /* Read JSON helpers */
 const readCoursesFromFile = async () => {

@@ -2,7 +2,8 @@ const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
 const path = require("path");
-const fileUpload = require("express-fileupload"); 
+const fileUpload = require("express-fileupload");
+const { UPLOADS_DIR } = require("./paths");
 
 const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");
@@ -14,7 +15,11 @@ const app = express();
 
 /* ✅ DEFINE CORS OPTIONS ONCE */
 const corsOptions = {
-  origin: "http://localhost:5173",
+  // In production (pkg binary), frontend is served by Express on same origin.
+  // In dev, Vite runs on 5173.
+  origin: process.env.NODE_ENV === "production"
+    ? false                          // same-origin, no CORS needed
+    : "http://localhost:5173",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type"],
@@ -45,26 +50,29 @@ app.use(
 
 app.use(fileUpload()); // ✅ enables file upload
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(UPLOADS_DIR));
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "Automated Grading System Backend is running"
-  });
-});
-
+/* ✅ API ROUTES — must come before static/catch-all */
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
-app.use("/api/upload", uploadRoutes); 
+app.use("/api/upload", uploadRoutes);
 app.use("/api/grading", gradingRoutes);
 app.use("/api/stats", statsRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found"
+/* Serve built React frontend (present after npm run build) */
+const frontendPath = path.join(__dirname, "public");
+if (require("fs").existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+  // Catch-all: let React Router handle client-side routes
+  app.get("/{*path}", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
   });
-});
+} else {
+  // Dev fallback: plain 404 for unknown routes
+  app.use((req, res) => {
+    res.status(404).json({ success: false, message: "Route not found" });
+  });
+}
 
 app.use((err, req, res, next) => {
   console.error("Server Error:", err);
