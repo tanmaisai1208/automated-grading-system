@@ -36,7 +36,7 @@ export default function AutomatedGrade() {
   const fetchConfig = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/grading/config/${encodeURIComponent(decodedCourseId)}`,
+        `/api/grading/config/${encodeURIComponent(decodedCourseId)}`,
         { credentials: "include" },
       );
       const data = await res.json();
@@ -56,7 +56,7 @@ export default function AutomatedGrade() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/grading/compute/${encodeURIComponent(decodedCourseId)}`,
+        `/api/grading/compute/${encodeURIComponent(decodedCourseId)}`,
         { method: "POST", credentials: "include" },
       );
       const data = await res.json();
@@ -229,7 +229,7 @@ export default function AutomatedGrade() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`,
+        `/api/grading/${encodeURIComponent(decodedCourseId)}`,
         { credentials: "include" },
       );
       const data = await res.json();
@@ -255,7 +255,7 @@ export default function AutomatedGrade() {
 
       // Check gradesComputed flag
       const res = await fetch(
-        `http://localhost:5000/api/grading/${encodeURIComponent(decodedCourseId)}`,
+        `/api/grading/${encodeURIComponent(decodedCourseId)}`,
         { credentials: "include" },
       );
       const data = await res.json();
@@ -320,7 +320,7 @@ export default function AutomatedGrade() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/grading/boundary/${encodeURIComponent(decodedCourseId)}`,
+        `/api/grading/boundary/${encodeURIComponent(decodedCourseId)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -367,7 +367,7 @@ export default function AutomatedGrade() {
 
     try {
       const configRes = await fetch(
-        `http://localhost:5000/api/grading/config/${encodeURIComponent(decodedCourseId)}`,
+        `/api/grading/config/${encodeURIComponent(decodedCourseId)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -394,7 +394,7 @@ export default function AutomatedGrade() {
   const saveChanges = async () => {
     try {
       await fetch(
-        `http://localhost:5000/api/grading/manual/${encodeURIComponent(decodedCourseId)}`,
+        `/api/grading/manual/${encodeURIComponent(decodedCourseId)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

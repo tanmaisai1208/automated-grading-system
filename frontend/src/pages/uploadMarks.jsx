@@ -24,7 +24,7 @@ const UploadMarks = () => {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:5000/api/upload", {
+      const res = await fetch("/api/upload", {
         method: "POST",
         credentials: "include",
         body: formData,

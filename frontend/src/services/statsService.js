@@ -1,5 +1,5 @@
 export const getStats = async () => {
-  const res = await fetch("http://localhost:5000/api/stats/overall");
+  const res = await fetch("/api/stats/overall", { credentials: "include" });
 
   if (!res.ok) {
     throw new Error("Failed to fetch stats");

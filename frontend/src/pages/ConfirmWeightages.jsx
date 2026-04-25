@@ -76,7 +76,7 @@ const ConfirmWeightages = () => {
         if (c.totalMarks !== "") totalMarksObj[c.id] = Number(c.totalMarks);
       });
 
-      const res = await fetch(`http://localhost:5000/api/grading/config/${courseData.courseId}`, {
+      const res = await fetch(`/api/grading/config/${courseData.courseId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

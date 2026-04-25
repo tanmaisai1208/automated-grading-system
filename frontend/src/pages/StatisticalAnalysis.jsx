@@ -111,7 +111,8 @@ const StatisticalAnalysis = () => {
     const fetchStats = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/courses/${courseId}`,
+          `/api/courses/${courseId}`,
+          { credentials: "include" }
         );
         const data = await res.json();
 
