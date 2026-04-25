@@ -62,35 +62,32 @@ function recomputeTotalMarks(students, weightages, maxMarks) {
   });
 }
 
-/* ─── AP Grade assignment ────────────────────────────────────────────────────
-   Rules:
-   1. Count how many students got AA.
-   2. AA count must be >= 2% of total class — otherwise no AP awarded.
-   3. Top 2% of the ENTIRE class (by totalMarks) get AP, replacing their grade.
-   4. "top 2%" is always at least 1 student (Math.ceil), but only if rule 2 passes.
-   5. Ties at the cutoff mark all get AP.
-
-   Operates on the gradeField passed in — so it works for both
-   automatedGrade (initial compute) and manualGrade (subsequent edits).
+/* ─── AP Grade assignment ─────────────────────────────────────────────────
+   Returns { students, apCutoff } so callers can save AP boundary.
+   apCutoff is null if AP was not awarded.
 ──────────────────────────────────────────────────────────────────────────── */
 function assignAPGrade(students, gradeField) {
-  const total      = students.length;
-  const apCount    = Math.ceil(total * 0.02);   // top 2%, min 1
-  const aaCount    = students.filter((s) => s[gradeField] === "AA").length;
-  const aaThreshold = Math.ceil(total * 0.02);  // AA must be >= 2% of class
+  const total       = students.length;
+  const apCount     = Math.ceil(total * 0.02);   // top 2%, min 1
+  const aaCount     = students.filter((s) => s[gradeField] === "AA").length;
+  const aaThreshold = Math.ceil(total * 0.02);   // AA must be >= 2% of class
 
   // Not enough AA students — no AP awarded
-  if (aaCount < aaThreshold) return students;
+  if (aaCount < aaThreshold) {
+    return { students, apCutoff: null };
+  }
 
   // Sort descending by totalMarks to find the cutoff mark for top 2%
   const sorted     = [...students].sort((a, b) => b.totalMarks - a.totalMarks);
   const cutoffMark = sorted[apCount - 1]?.totalMarks ?? Infinity;
 
   // Assign AP to everyone at or above the cutoff mark (handles ties)
-  return students.map((s) => ({
+  const updated = students.map((s) => ({
     ...s,
     [gradeField]: s.totalMarks >= cutoffMark ? "AP" : s[gradeField],
   }));
+
+  return { students: updated, apCutoff: cutoffMark };
 }
 
 /* ─── Compute grades ─────────────────────────────────────────────────────── */
@@ -129,14 +126,26 @@ const computeGrades = async (courseId) => {
     manualGrade:    getGrade(student.totalMarks || 0, boundaries),
   }));
 
-  // Then elevate top 2% to AP on both fields
-  students = assignAPGrade(students, "automatedGrade");
-  students = assignAPGrade(students, "manualGrade");
+  // Elevate top 2% to AP on automatedGrade and save cutoff
+  const { students: autoAP, apCutoff: autoCutoff } =
+    assignAPGrade(students, "automatedGrade");
+  students = autoAP;
+
+  // Elevate top 2% to AP on manualGrade
+  const { students: manualAP, apCutoff: manualCutoff } =
+    assignAPGrade(students, "manualGrade");
+  students = manualAP;
+
+  // Save AP boundary if awarded (cutoff is same for both fields)
+  const apBoundary = autoCutoff ?? manualCutoff ?? null;
+  if (apBoundary !== null) {
+    boundaries.AP = apBoundary;
+  }
 
   if (!course.stats) course.stats = {};
   course.stats.mean       = Number(mean.toFixed(2));
   course.stats.sd         = Number(sd.toFixed(2));
-  course.stats.boundaries = boundaries;
+  course.stats.boundaries = boundaries; // includes AP if awarded
   course.gradesComputed   = true;
   course.students         = students;
 
@@ -215,17 +224,24 @@ const setGradeConfig = async (courseId, config) => {
     const boundaries = getGradeBoundaries(mean, sd);
 
     if (!courses[index].stats) courses[index].stats = {};
-    courses[index].stats.mean       = Number(mean.toFixed(2));
-    courses[index].stats.sd         = Number(sd.toFixed(2));
-    courses[index].stats.boundaries = boundaries;
+    courses[index].stats.mean = Number(mean.toFixed(2));
+    courses[index].stats.sd   = Number(sd.toFixed(2));
 
-    // Assign manualGrade then elevate AP — automatedGrade untouched
+    // Assign manualGrade first — automatedGrade untouched
     studentsWithNewTotals = studentsWithNewTotals.map((student) => ({
       ...student,
       manualGrade: getGrade(student.totalMarks, boundaries),
     }));
-    studentsWithNewTotals = assignAPGrade(studentsWithNewTotals, "manualGrade");
 
+    // Elevate AP on manualGrade and save cutoff to boundaries
+    const { students: withAP, apCutoff } =
+      assignAPGrade(studentsWithNewTotals, "manualGrade");
+    studentsWithNewTotals = withAP;
+
+    if (apCutoff !== null) boundaries.AP = apCutoff;
+    else delete boundaries.AP; // remove if AP no longer qualifies
+
+    courses[index].stats.boundaries = boundaries;
     courses[index].students = studentsWithNewTotals;
   }
 
@@ -259,7 +275,8 @@ const applyBoundaryEdit = async (courseId, boundaries) => {
   );
   if (index === -1) return null;
 
-  const order = ["AP", "AA", "AB", "BB", "BC", "CC", "CD", "DD"];
+  // Validate descending order (skip AP — it's percentage-based, not boundary-based)
+  const order = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"];
   for (let i = 0; i < order.length - 1; i++) {
     if (boundaries[order[i]] < boundaries[order[i + 1]]) {
       return {
@@ -269,15 +286,22 @@ const applyBoundaryEdit = async (courseId, boundaries) => {
   }
 
   if (!courses[index].stats) courses[index].stats = {};
-  courses[index].stats.boundaries = boundaries;
 
-  // Assign manualGrade from new boundaries then elevate AP
+  // Assign manualGrade from new boundaries — automatedGrade untouched
   let updatedStudents = (courses[index].students || []).map((student) => ({
     ...student,
     manualGrade: getGrade(student.totalMarks || 0, boundaries),
   }));
-  updatedStudents = assignAPGrade(updatedStudents, "manualGrade");
 
+  // Elevate AP on manualGrade and save cutoff to boundaries
+  const { students: withAP, apCutoff } =
+    assignAPGrade(updatedStudents, "manualGrade");
+  updatedStudents = withAP;
+
+  if (apCutoff !== null) boundaries.AP = apCutoff;
+  else delete boundaries.AP; // remove if AP no longer qualifies
+
+  courses[index].stats.boundaries = boundaries;
   courses[index].students = updatedStudents;
 
   writeCourses(courses);
